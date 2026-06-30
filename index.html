@@ -1,0 +1,916 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Pre-Qualification Approval Form</title>
+    <style>
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+
+        @page {
+            size: A4 portrait;
+            margin: 0;
+        }
+
+        body {
+            font-family: Arial, sans-serif;
+            font-size: 10px;
+            color: #000;
+            background-color: #f5f5f5;
+        }
+
+        .page-container {
+            width: 210mm;
+            height: 297mm;
+            padding: 5mm 8mm;
+            margin: 10px auto;
+            background: #fff;
+            box-shadow: 0 0 8px rgba(0, 0, 0, 0.15);
+            display: flex;
+            flex-direction: column;
+            overflow: hidden;
+        }
+
+        .top-header-table {
+            width: 100%;
+            border-collapse: collapse;
+            border: 1px solid #000;
+            margin-bottom: 3px;
+            flex-shrink: 0;
+        }
+
+        .top-header-table td {
+            border: 1px solid #000;
+            padding: 2px 3px;
+            vertical-align: middle;
+        }
+
+        .page-border-wrapper {
+            width: 100%;
+            flex: 1 1 0;
+            border: 1px solid #000;
+            padding: 3px 4px;
+            display: flex;
+            flex-direction: column;
+            gap: 3px;
+            overflow: hidden;
+        }
+
+        .action-bar {
+            max-width: 210mm;
+            margin: 10px auto 0 auto;
+            text-align: right;
+        }
+
+        .print-btn {
+            background-color: #0056b3;
+            color: #fff;
+            border: none;
+            padding: 8px 18px;
+            font-size: 13px;
+            font-weight: bold;
+            border-radius: 4px;
+            cursor: pointer;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.15);
+        }
+
+        .print-btn:hover {
+            background-color: #004085;
+        }
+
+        .logo-box {
+            width: 25%;
+            text-align: center;
+            font-weight: bold;
+            font-size: 11px;
+            color: #555;
+        }
+
+        .title-box {
+            width: 50%;
+            text-align: center;
+            font-size: 13px;
+            font-weight: bold;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+
+        .control-box {
+            width: 25%;
+            font-size: 8px;
+            padding: 0 !important;
+        }
+
+        .control-box table {
+            width: 100%;
+            border-collapse: collapse;
+        }
+
+        .control-box td {
+            border: none;
+            border-bottom: 1px solid #000;
+            padding: 2px 4px;
+        }
+
+        .control-box tr:last-child td {
+            border-bottom: none;
+        }
+
+        .doc-info {
+            width: 100%;
+            border-collapse: collapse;
+            flex-shrink: 0;
+        }
+
+        .doc-info td {
+            border: 1px solid #000;
+            padding: 1px 4px;
+            height: 16px;
+            font-size: 9.5px;
+        }
+
+        .bg-gray {
+            background-color: #f2f2f2;
+            font-weight: bold;
+        }
+
+        .qual-table {
+            width: 100%;
+            border-collapse: collapse;
+            flex: 1 1 auto;
+            table-layout: fixed;
+        }
+
+        .qual-table th,
+        .qual-table td {
+            border: 1px solid #000;
+            padding: 0px 1px;
+            text-align: center;
+            vertical-align: middle;
+            font-size: 11px;
+        }
+
+        .qual-table th {
+            background-color: #f2f2f2;
+            font-weight: bold;
+            font-size: 8.5px;
+        }
+
+        .text-left {
+            text-align: left !important;
+        }
+
+        .remarks-section {
+            font-size: 8.5px;
+            line-height: 1.2;
+            margin-top: 0;
+            padding: 0 2px;
+            flex-shrink: 0;
+        }
+
+        .remarks-title {
+            margin-bottom: 1px;
+        }
+
+        .remarks-section ol {
+            padding-left: 14px;
+        }
+
+        .footer-table {
+            width: 100%;
+            border-collapse: collapse;
+        }
+
+        .footer-table td {
+            border: 1px solid #000;
+            padding: 3px;
+            height: 22px;
+            text-align: center;
+        }
+
+        /* Form controls */
+        .cell-select,
+        .cell-input,
+        .cell-textarea {
+            width: 100%;
+            border: none;
+            outline: none;
+            margin: 0;
+            padding: 0 2px;
+            font-size: 11px;
+            font-family: Arial, Helvetica, sans-serif;
+            background: transparent;
+            box-sizing: border-box;
+            display: block;
+        }
+
+        .cell-select {
+            cursor: pointer;
+            text-align: center;
+        }
+
+        .cell-textarea {
+            resize: none;
+            overflow: auto;
+        }
+
+        .no-print {}
+
+        @media print {
+            .no-print {
+                display: none !important;
+            }
+
+            body {
+                background-color: #fff;
+                -webkit-print-color-adjust: exact;
+                print-color-adjust: exact;
+            }
+
+            .action-bar {
+                display: none;
+            }
+
+            .page-container {
+                margin: 0;
+                box-shadow: none;
+                width: 210mm;
+                height: 297mm;
+                padding: 5mm 8mm;
+            }
+
+            select,
+            input,
+            textarea {
+                -webkit-appearance: none;
+                border: none;
+                background: transparent;
+            }
+        }
+    </style>
+    <style>
+        /* Date picker styling */
+        .date-cell { position:relative; display:flex; align-items:center; gap:2px; }
+        .date-display { flex:1; border:none; outline:none; font-size:11px; font-family:Arial,Helvetica,sans-serif; text-align:center; cursor:default; background:transparent; }
+        .date-cal-btn { background:none; border:none; cursor:pointer; font-size:13px; padding:0 2px; line-height:1; color:#333; }
+        .date-cal-btn:hover { color:#0056b3; }
+        .date-hidden-picker { position:absolute; top:0; left:0; width:0; height:0; opacity:0; pointer-events:none; }
+        @media print {
+            .date-cal-btn { display:none !important; }
+        }
+    </style>
+</head>
+
+<body>
+    <div class="action-bar"><button class="print-btn" onclick="window.print()">Print Form</button></div>
+    <div class="page-container">
+        <table class="top-header-table" style="border-collapse: collapse; border: rgb(0, 0, 0); width: 100%; padding: 1px;">
+            <tbody>
+                <tr>
+                    <td class="logo-box" style="width: 37.4652%; text-align: left; vertical-align: bottom; border: rgb(0, 0, 0); padding: 1px;"><span style="font-size: 12px;">Commissioning Services Department</span></td>
+                    <td class="title-box" style="width: 25.0696%; border: rgb(0, 0, 0); padding: 1px;"><img src="data:image/png;base64,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" style="width: 133px;"></td>
+                    <td class="title-box" style="width: 37.4652%; text-align: right; vertical-align: bottom; border: rgb(0, 0, 0); padding: 1px;"><span style="font-size: 12px;">TP-NG-6450-010-003, R03</span></td>
+                </tr>
+                <tr>
+                    <td style="width: 99.8607%; text-align: center; background-color: rgb(255, 255, 255); border-width: medium; border-style: double none none; border-color: rgb(0, 0, 0); padding: 1px;" colspan="3"><br><span style="font-size: 12px;"><strong>Pre-Qualification Approval Form for T&amp;C Contractor Engineer</strong></span></td>
+                </tr>
+            </tbody>
+        </table>
+        <div class="page-border-wrapper">
+            <table class="doc-info" style="border-collapse: collapse; border: rgb(0, 0, 0); width: 100%; font-family: Arial, Helvetica, sans-serif;">
+                <tbody>
+                    <tr>
+                        <td class="bg-gray" style="width: 11.5656%; background-color: rgb(255, 255, 255); border: rgb(0, 0, 0);"><span style="font-size: 10px;">Name</span></td>
+                        <td style="width: 1.9337%; padding: 1px; text-align: center; border: rgb(0, 0, 0);"><strong>:</strong></td>
+                        <td style="width: 36.0497%; border-width: medium medium 1px; border-style: none none solid; border-color: rgb(0, 0, 0); padding: 0px; vertical-align: middle;"><input type="text" class="cell-input"></td>
+                        <td class="bg-gray" style="width: 16.3611%; background-color: rgb(255, 255, 255); border: rgb(0, 0, 0);"><span style="font-size: 10px;">Company Name</span></td>
+                        <td style="width: 1.8336%; padding: 1px; text-align: center; border: rgb(0, 0, 0);"><strong>:</strong></td>
+                        <td style="width: 31.8758%; border-width: medium medium 1px; border-style: none none solid; border-color: rgb(0, 0, 0); padding:0; vertical-align: middle;" colspan="4"><input type="text" class="cell-input"></td>
+                    </tr>
+                    <tr>
+                        <td class="bg-gray" style="width: 11.5656%; background-color: rgb(255, 255, 255); border: rgb(0, 0, 0);"><span style="font-size: 10px;">Nationality</span></td>
+                        <td style="width: 1.9337%; padding: 1px; text-align: center; border: rgb(0, 0, 0);"><strong>:</strong></td>
+                        <td style="width: 36.0497%; border-width: medium medium 1px; border-style: none none solid; border-color: rgb(0, 0, 0); padding: 0px;"><input type="text" class="cell-input"></td>
+                        <td class="bg-gray" style="width: 16.3611%; background-color: rgb(255, 255, 255); border: rgb(0, 0, 0);"><span style="font-size: 10px;">Total Experience</span></td>
+                        <td style="width: 1.8336%; padding: 1px; text-align: center; border: rgb(0, 0, 0);"><strong>:</strong></td>
+                        <td style="width: 9.9789%; border-width: medium medium 1px; border-style: none none solid; border-color: rgb(0, 0, 0); padding:0; text-align:center;"><input type="text" class="cell-input" style="text-align:center;"></td>
+                        <td style="width: 6.3623%; background-color: rgb(255, 255, 255); text-align: center; border: rgb(0, 0, 0);"><strong><span style="font-size: 10px;">Years</span></strong></td>
+                        <td class="bg-gray" style="width: 6.7774%; background-color: rgb(255, 255, 255); border-width: medium medium 1px; border-style: none none solid; border-color: rgb(0, 0, 0); padding: 0px; text-align: center;"><input type="text" class="cell-input" style="text-align:center;"></td>
+                        <td class="bg-gray" style="width: 8.7744%; background-color: rgb(255, 255, 255); text-align: center; border: rgb(0, 0, 0);"><span style="font-size: 10px;">Months</span></td>
+                    </tr>
+                    <tr>
+                        <td class="bg-gray" style="width: 11.5656%; background-color: rgb(255, 255, 255); border: rgb(0, 0, 0);"><span style="font-size: 10px;">Identity No<br></span></td>
+                        <td style="width: 1.9337%; padding: 1px; text-align: center; border: rgb(0, 0, 0);"><strong>:</strong></td>
+                        <td style="width: 36.0497%; border-width: medium medium 1px; border-style: none none solid; border-color: rgb(0, 0, 0); padding: 0px;"><input type="text" class="cell-input"></td>
+                        <td style="width: 16.3611%; background-color: rgb(255, 255, 255); border: rgb(0, 0, 0);"><strong><span style="font-size: 10px;">Experience in KSA</span></strong></td>
+                        <td style="width: 1.8336%; text-align: center; border: rgb(0, 0, 0);"><strong>:</strong></td>
+                        <td style="width: 9.9789%; background-color: rgb(255, 255, 255); border-width: medium medium 1px; border-style: none none solid; border-color: rgb(0, 0, 0); padding:0; text-align:center;"><input type="text" class="cell-input" style="text-align:center;"></td>
+                        <td style="width: 6.3623%; background-color: rgb(255, 255, 255); text-align: center; border: rgb(0, 0, 0);"><strong><span style="font-size: 10px;">Years</span></strong><br></td>
+                        <td style="width: 6.7774%; background-color: rgb(255, 255, 255); border-width: medium medium 1px; border-style: none none solid; border-color: rgb(0, 0, 0); padding: 0px; text-align: center;"><input type="text" class="cell-input" style="text-align:center;"></td>
+                        <td style="width: 8.7744%; background-color: rgb(255, 255, 255); text-align: center; border: rgb(0, 0, 0);"><strong><span style="font-size: 10px;">Months</span></strong><br></td>
+                    </tr>
+                    <tr>
+                        <td class="bg-gray" style="width: 11.5656%; background-color: rgb(255, 255, 255); border: rgb(0, 0, 0);"><span style="font-size: 10px;">CSD ID No</span></td>
+                        <td style="text-align: center; width: 1.9337%; border: rgb(0, 0, 0);"><strong>:</strong></td>
+                        <td style="text-align: right; width: 36.0497%; border-width: medium medium 1px; border-style: none none solid; border-color: rgb(0, 0, 0);"><br></td>
+                        <td style="text-align: left; padding-right: 15px; background-color: rgb(255, 255, 255); width: 16.3611%; border: rgb(0, 0, 0);"><strong><span style="font-size: 10px;">Contact No</span></strong></td>
+                        <td style="text-align: center; padding: 1px; width: 1.8336%; border: rgb(0, 0, 0);"><strong>:</strong></td>
+                        <td style="text-align: left; width: 31.8758%; background-color: rgb(255, 255, 255); border-width: medium medium 1px; border-style: none none solid; border-color: rgb(0, 0, 0); padding:0;" colspan="4"><input type="text" class="cell-input"></td>
+                    </tr>
+                    <tr>
+                        <td class="bg-gray" style="width: 11.5656%; background-color: rgb(255, 255, 255); border: rgb(0, 0, 0);"><span style="font-size: 10px;">Revision No</span></td>
+                        <td style="width: 1.9337%; padding: 1px; text-align: center; border: rgb(0, 0, 0);"><strong>:</strong></td>
+                        <td style="width: 36.0497%; border-width: medium medium 1px; border-style: none none solid; border-color: rgb(0, 0, 0);"><br></td>
+                        <td style="width: 50.1145%; background-color: rgb(255, 255, 255); border: rgb(0, 0, 0);" colspan="6"><br></td>
+                    </tr>
+                </tbody>
+            </table>
+            <p><br></p>
+            <div style="flex:1 1 0;overflow:hidden;display:flex;flex-direction:column;min-height:0;">
+                <table class="qual-table" style="font-family: Arial, Helvetica, sans-serif; border-collapse: collapse; border: 2px solid rgb(0, 0, 0); width: 100%;">
+                    <thead>
+                        <tr>
+                            <th rowspan="2" style="width: 3%; border: 2px solid rgb(0, 0, 0);"><span style="font-size: 12px;">#</span></th>
+                            <th rowspan="2" style="width: 24.7352%; border: 2px solid rgb(0, 0, 0);"><span style="font-size: 12px;">QUALIFICATIONS</span></th>
+                            <th colspan="3" style="width: 21.4685%; border: 2px solid rgb(0, 0, 0);"><span style="font-size: 12px;">To be Filled by<br>T&amp;C Contractor</span></th>
+                            <th colspan="3" style="width: 22.5129%; border: 2px solid rgb(0, 0, 0);"><span style="font-size: 12px;">To be Filled by<br>CSD Approval</span></th>
+                            <th rowspan="2" style="width: 27.9665%; border: 2px solid rgb(0, 0, 0);"><span style="font-size: 12px;">REMARKS</span></th>
+                        </tr>
+                        <tr>
+                            <th style="width: 7.203%; border: 2px solid rgb(0, 0, 0);"><span style="font-size: 12px;">HV</span></th>
+                            <th style="width: 7.2343%; border: 2px solid rgb(0, 0, 0);"><span style="font-size: 12px;">MV</span></th>
+                            <th style="width: 7.0821%; border: 2px solid rgb(0, 0, 0);"><span style="font-size: 12px;">EHV</span></th>
+                            <th style="width: 7.5301%; border: 2px solid rgb(0, 0, 0);"><span style="font-size: 12px;">HV</span></th>
+                            <th style="width: 7.6537%; border: 2px solid rgb(0, 0, 0);"><span style="font-size: 12px;">MV</span></th>
+                            <th style="width: 7.3999%; border: 2px solid rgb(0, 0, 0);"><span style="font-size: 12px;">EHV</span></th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr>
+                            <td style="border: 2px solid rgb(0, 0, 0);"><span style="font-size: 11px;">1</span></td>
+                            <td class="text-left" style="border: 2px solid rgb(0, 0, 0); width: 24.7352%;"><span style="font-size: 11px;">Batteries&amp;Chargers</span></td>
+                            <td colspan="3" style="width: 21.4685%; border: 2px solid rgb(0, 0, 0); padding:0; text-align:center;"><select style="width:auto;border:none;outline:none;margin:0 auto;display:block;font-size:11px;font-family:Arial,Helvetica,sans-serif;cursor:pointer;text-align:center;">&nbsp;<option value="NO">NO</option>
+                                    <option value="YES">YES</option> &nbsp;
+                                </select></td>
+                            <td colspan="3" style="width: 22.5129%; border: 2px solid rgb(0, 0, 0); padding:0; text-align:center;"><select style="width:auto;border:none;outline:none;margin:0 auto;display:block;font-size:11px;font-family:Arial,Helvetica,sans-serif;cursor:pointer;text-align:center;">&nbsp;<option value="NO">NO</option>
+                                    <option value="YES">YES</option> &nbsp;
+                                </select></td>
+                            <td style="border: 2px solid rgb(0, 0, 0); width: 27.9665%; padding:0;"><input type="text" class="cell-input" style="height:100%;"></td>
+                        </tr>
+                        <tr>
+                            <td style="border: 2px solid rgb(0, 0, 0);"><span style="font-size: 11px;">2</span></td>
+                            <td class="text-left" style="border: 2px solid rgb(0, 0, 0); width: 24.7352%;"><span style="font-size: 11px;">ACDB&amp;DCDB</span></td>
+                            <td colspan="3" style="width: 21.4685%; border: 2px solid rgb(0, 0, 0); padding:0; text-align:center;"><select style="width:auto;border:none;outline:none;margin:0 auto;display:block;font-size:11px;font-family:Arial,Helvetica,sans-serif;cursor:pointer;text-align:center;">&nbsp;<option value="NO">NO</option>
+                                    <option value="YES">YES</option> &nbsp;
+                                </select></td>
+                            <td colspan="3" style="width: 22.5129%; border: 2px solid rgb(0, 0, 0); padding:0; text-align:center;"><select style="width:auto;border:none;outline:none;margin:0 auto;display:block;font-size:11px;font-family:Arial,Helvetica,sans-serif;cursor:pointer;text-align:center;">&nbsp;<option value="NO">NO</option>
+                                    <option value="YES">YES</option> &nbsp;
+                                </select></td>
+                            <td style="border: 2px solid rgb(0, 0, 0); width: 27.9665%; padding:0;"><input type="text" class="cell-input" style="height:100%;"></td>
+                        </tr>
+                        <tr>
+                            <td style="border: 2px solid rgb(0, 0, 0);"><span style="font-size: 11px;">3</span></td>
+                            <td class="text-left" style="border: 2px solid rgb(0, 0, 0); width: 24.7352%;"><span style="font-size: 11px;">Aux./Trip Relays&amp;MCCB</span></td>
+                            <td colspan="3" style="width: 21.4685%; border: 2px solid rgb(0, 0, 0); padding:0; text-align:center;"><select style="width:auto;border:none;outline:none;margin:0 auto;display:block;font-size:11px;font-family:Arial,Helvetica,sans-serif;cursor:pointer;text-align:center;">&nbsp;<option value="NO">NO</option>
+                                    <option value="YES">YES</option> &nbsp;
+                                </select></td>
+                            <td colspan="3" style="width: 22.5129%; border: 2px solid rgb(0, 0, 0); padding:0; text-align:center;"><select style="width:auto;border:none;outline:none;margin:0 auto;display:block;font-size:11px;font-family:Arial,Helvetica,sans-serif;cursor:pointer;text-align:center;">&nbsp;<option value="NO">NO</option>
+                                    <option value="YES">YES</option> &nbsp;
+                                </select></td>
+                            <td style="border: 2px solid rgb(0, 0, 0); width: 27.9665%; padding:0;"><input type="text" class="cell-input" style="height:100%;"></td>
+                        </tr>
+                        <tr>
+                            <td style="border: 2px solid rgb(0, 0, 0);"><span style="font-size: 11px;">4</span></td>
+                            <td class="text-left" style="border: 2px solid rgb(0, 0, 0); width: 24.7352%;"><span style="font-size: 11px;">Meters</span></td>
+                            <td colspan="3" style="width: 21.4685%; border: 2px solid rgb(0, 0, 0); padding:0; text-align:center;"><select style="width:auto;border:none;outline:none;margin:0 auto;display:block;font-size:11px;font-family:Arial,Helvetica,sans-serif;cursor:pointer;text-align:center;">&nbsp;<option value="NO">NO</option>
+                                    <option value="YES">YES</option> &nbsp;
+                                </select></td>
+                            <td colspan="3" style="width: 22.5129%; border: 2px solid rgb(0, 0, 0); padding:0; text-align:center;"><select style="width:auto;border:none;outline:none;margin:0 auto;display:block;font-size:11px;font-family:Arial,Helvetica,sans-serif;cursor:pointer;text-align:center;">&nbsp;<option value="NO">NO</option>
+                                    <option value="YES">YES</option> &nbsp;
+                                </select></td>
+                            <td style="border: 2px solid rgb(0, 0, 0); width: 27.9665%; padding:0;"><input type="text" class="cell-input" style="height:100%;"></td>
+                        </tr>
+                        <tr>
+                            <td style="border: 2px solid rgb(0, 0, 0);"><span style="font-size: 11px;">5</span></td>
+                            <td class="text-left" style="border: 2px solid rgb(0, 0, 0); width: 24.7352%;"><span style="font-size: 11px;">Power Transformer</span></td>
+                            <td style="border: 2px solid rgb(0, 0, 0); width: 7.203%; padding:0;"><select class="cell-select">&nbsp;<option value="NO">NO</option>
+                                    <option value="YES">YES</option> &nbsp;
+                                </select></td>
+                            <td style="width: 7.2343%; border: 2px solid rgb(0, 0, 0); padding:0;"><select class="cell-select">&nbsp;<option value="NO">NO</option>
+                                    <option value="YES">YES</option> &nbsp;
+                                </select></td>
+                            <td style="width: 7.0821%; border: 2px solid rgb(0, 0, 0); padding:0;"><select class="cell-select">&nbsp;<option value="NO">NO</option>
+                                    <option value="YES">YES</option> &nbsp;
+                                </select></td>
+                            <td style="width: 7.5301%; border: 2px solid rgb(0, 0, 0); padding:0;"><select class="cell-select">&nbsp;<option value="NO">NO</option>
+                                    <option value="YES">YES</option> &nbsp;
+                                </select></td>
+                            <td style="width: 7.6537%; border: 2px solid rgb(0, 0, 0); padding:0;"><select class="cell-select">&nbsp;<option value="NO">NO</option>
+                                    <option value="YES">YES</option> &nbsp;
+                                </select></td>
+                            <td style="border: 2px solid rgb(0, 0, 0); width: 7.3999%; padding:0;"><select class="cell-select">&nbsp;<option value="NO">NO</option>
+                                    <option value="YES">YES</option> &nbsp;
+                                </select></td>
+                            <td style="border: 2px solid rgb(0, 0, 0); width: 27.9665%; padding:0;"><input type="text" class="cell-input" style="height:100%;"></td>
+                        </tr>
+                        <tr>
+                            <td style="border: 2px solid rgb(0, 0, 0);"><span style="font-size: 11px;">6</span></td>
+                            <td class="text-left" style="border: 2px solid rgb(0, 0, 0); width: 24.7352%;"><span style="font-size: 11px;">Shunt Reactor</span></td>
+                            <td style="border: 2px solid rgb(0, 0, 0); width: 7.203%; padding:0;"><select class="cell-select">&nbsp;<option value="NO">NO</option>
+                                    <option value="YES">YES</option> &nbsp;
+                                </select></td>
+                            <td style="width: 7.2343%; border: 2px solid rgb(0, 0, 0); padding:0;"><select class="cell-select">&nbsp;<option value="NO">NO</option>
+                                    <option value="YES">YES</option> &nbsp;
+                                </select></td>
+                            <td style="width: 7.0821%; border: 2px solid rgb(0, 0, 0); padding:0;"><select class="cell-select">&nbsp;<option value="NO">NO</option>
+                                    <option value="YES">YES</option> &nbsp;
+                                </select></td>
+                            <td style="width: 7.5301%; border: 2px solid rgb(0, 0, 0); padding:0;"><select class="cell-select">&nbsp;<option value="NO">NO</option>
+                                    <option value="YES">YES</option> &nbsp;
+                                </select></td>
+                            <td style="width: 7.6537%; border: 2px solid rgb(0, 0, 0); padding:0;"><select class="cell-select">&nbsp;<option value="NO">NO</option>
+                                    <option value="YES">YES</option> &nbsp;
+                                </select></td>
+                            <td style="border: 2px solid rgb(0, 0, 0); width: 7.3999%; padding:0;"><select class="cell-select">&nbsp;<option value="NO">NO</option>
+                                    <option value="YES">YES</option> &nbsp;
+                                </select></td>
+                            <td style="border: 2px solid rgb(0, 0, 0); width: 27.9665%; padding:0;"><input type="text" class="cell-input" style="height:100%;"></td>
+                        </tr>
+                        <tr>
+                            <td style="border: 2px solid rgb(0, 0, 0);"><span style="font-size: 11px;">7</span></td>
+                            <td class="text-left" style="border: 2px solid rgb(0, 0, 0); width: 24.7352%;"><span style="font-size: 11px;">Capacitor</span></td>
+                            <td style="border: 2px solid rgb(0, 0, 0); width: 7.203%; padding:0;"><select class="cell-select">&nbsp;<option value="NO">NO</option>
+                                    <option value="YES">YES</option> &nbsp;
+                                </select></td>
+                            <td style="width: 7.2343%; border: 2px solid rgb(0, 0, 0); padding:0;"><select class="cell-select">&nbsp;<option value="NO">NO</option>
+                                    <option value="YES">YES</option> &nbsp;
+                                </select></td>
+                            <td style="width: 7.0821%; border: 2px solid rgb(0, 0, 0); padding:0;"><select class="cell-select">&nbsp;<option value="NO">NO</option>
+                                    <option value="YES">YES</option> &nbsp;
+                                </select></td>
+                            <td style="width: 7.5301%; border: 2px solid rgb(0, 0, 0); padding:0;"><select class="cell-select">&nbsp;<option value="NO">NO</option>
+                                    <option value="YES">YES</option> &nbsp;
+                                </select></td>
+                            <td style="width: 7.6537%; border: 2px solid rgb(0, 0, 0); padding:0;"><select class="cell-select">&nbsp;<option value="NO">NO</option>
+                                    <option value="YES">YES</option> &nbsp;
+                                </select></td>
+                            <td style="border: 2px solid rgb(0, 0, 0); width: 7.3999%; padding:0;"><select class="cell-select">&nbsp;<option value="NO">NO</option>
+                                    <option value="YES">YES</option> &nbsp;
+                                </select></td>
+                            <td style="border: 2px solid rgb(0, 0, 0); width: 27.9665%; padding:0;"><input type="text" class="cell-input" style="height:100%;"></td>
+                        </tr>
+                        <tr>
+                            <td style="border: 2px solid rgb(0, 0, 0);"><span style="font-size: 11px;">8</span></td>
+                            <td class="text-left" style="border: 2px solid rgb(0, 0, 0); width: 24.7352%;"><span style="font-size: 11px;">OHTL</span></td>
+                            <td colspan="3" style="width: 21.4685%; border: 2px solid rgb(0, 0, 0); padding:0; text-align:center;"><select style="width:auto;border:none;outline:none;margin:0 auto;display:block;font-size:11px;font-family:Arial,Helvetica,sans-serif;cursor:pointer;text-align:center;">&nbsp;<option value="NO">NO</option>
+                                    <option value="YES">YES</option> &nbsp;
+                                </select></td>
+                            <td style="width: 22.5129%; border: 2px solid rgb(0, 0, 0); padding:0; text-align:center;" colspan="3"><select style="width:auto;border:none;outline:none;margin:0 auto;display:block;font-size:11px;font-family:Arial,Helvetica,sans-serif;cursor:pointer;text-align:center;">&nbsp;<option value="NO">NO</option>
+                                    <option value="YES">YES</option> &nbsp;
+                                </select></td>
+                            <td style="border: 2px solid rgb(0, 0, 0); width: 27.9665%; padding:0;"><input type="text" class="cell-input" style="height:100%;"></td>
+                        </tr>
+                        <tr>
+                            <td style="border: 2px solid rgb(0, 0, 0);"><span style="font-size: 11px;">9</span></td>
+                            <td class="text-left" style="border: 2px solid rgb(0, 0, 0); width: 24.7352%;"><span style="font-size: 11px;">Power Cable Electrical Tests</span></td>
+                            <td style="border: 2px solid rgb(0, 0, 0); width: 7.203%; padding:0;"><select class="cell-select">&nbsp;<option value="NO">NO</option>
+                                    <option value="YES">YES</option> &nbsp;
+                                </select></td>
+                            <td style="width: 7.2343%; border: 2px solid rgb(0, 0, 0); padding:0;"><select class="cell-select">&nbsp;<option value="NO">NO</option>
+                                    <option value="YES">YES</option> &nbsp;
+                                </select></td>
+                            <td style="width: 7.0821%; border: 2px solid rgb(0, 0, 0); padding:0;"><select class="cell-select">&nbsp;<option value="NO">NO</option>
+                                    <option value="YES">YES</option> &nbsp;
+                                </select></td>
+                            <td style="width: 7.5301%; border: 2px solid rgb(0, 0, 0); padding:0;"><select class="cell-select">&nbsp;<option value="NO">NO</option>
+                                    <option value="YES">YES</option> &nbsp;
+                                </select></td>
+                            <td style="width: 7.6537%; border: 2px solid rgb(0, 0, 0); padding:0;"><select class="cell-select">&nbsp;<option value="NO">NO</option>
+                                    <option value="YES">YES</option> &nbsp;
+                                </select></td>
+                            <td style="border: 2px solid rgb(0, 0, 0); width: 7.3999%; padding:0;"><select class="cell-select">&nbsp;<option value="NO">NO</option>
+                                    <option value="YES">YES</option> &nbsp;
+                                </select></td>
+                            <td style="border: 2px solid rgb(0, 0, 0); width: 27.9665%; padding:0;"><input type="text" class="cell-input" style="height:100%;"></td>
+                        </tr>
+                        <tr>
+                            <td style="border: 2px solid rgb(0, 0, 0);"><span style="font-size: 11px;">10</span></td>
+                            <td class="text-left" style="border: 2px solid rgb(0, 0, 0); width: 24.7352%;"><span style="font-size: 11px;">Power Cable HV Test</span></td>
+                            <td style="border: 2px solid rgb(0, 0, 0); width: 7.203%; padding:0;"><select class="cell-select">&nbsp;<option value="NO">NO</option>
+                                    <option value="YES">YES</option> &nbsp;
+                                </select></td>
+                            <td style="width: 7.2343%; border: 2px solid rgb(0, 0, 0); padding:0;"><select class="cell-select">&nbsp;<option value="NO">NO</option>
+                                    <option value="YES">YES</option> &nbsp;
+                                </select></td>
+                            <td style="width: 7.0821%; border: 2px solid rgb(0, 0, 0); padding:0;"><select class="cell-select">&nbsp;<option value="NO">NO</option>
+                                    <option value="YES">YES</option> &nbsp;
+                                </select></td>
+                            <td style="width: 7.5301%; border: 2px solid rgb(0, 0, 0); padding:0;"><select class="cell-select">&nbsp;<option value="NO">NO</option>
+                                    <option value="YES">YES</option> &nbsp;
+                                </select></td>
+                            <td style="width: 7.6537%; border: 2px solid rgb(0, 0, 0); padding:0;"><select class="cell-select">&nbsp;<option value="NO">NO</option>
+                                    <option value="YES">YES</option> &nbsp;
+                                </select></td>
+                            <td style="border: 2px solid rgb(0, 0, 0); width: 7.3999%; padding:0;"><select class="cell-select">&nbsp;<option value="NO">NO</option>
+                                    <option value="YES">YES</option> &nbsp;
+                                </select></td>
+                            <td style="border: 2px solid rgb(0, 0, 0); width: 27.9665%; padding:0;"><input type="text" class="cell-input" style="height:100%;"></td>
+                        </tr>
+                        <tr>
+                            <td style="border: 2px solid rgb(0, 0, 0);"><span style="font-size: 11px;">11</span></td>
+                            <td class="text-left" style="border: 2px solid rgb(0, 0, 0); width: 24.7352%;"><span style="font-size: 11px;">Power Cable PD Test<sup><span style="color: rgb(255, 0, 0);">1)</span></sup></span></td>
+                            <td style="border: 2px solid rgb(0, 0, 0); width: 7.203%; padding:0;"><select class="cell-select">&nbsp;<option value="NO">NO</option>
+                                    <option value="YES">YES</option> &nbsp;
+                                </select></td>
+                            <td style="width: 7.2343%; border: 2px solid rgb(0, 0, 0); padding:0;"><select class="cell-select">&nbsp;<option value="NO">NO</option>
+                                    <option value="YES">YES</option> &nbsp;
+                                </select></td>
+                            <td style="width: 7.0821%; border: 2px solid rgb(0, 0, 0); padding:0;"><select class="cell-select">&nbsp;<option value="NO">NO</option>
+                                    <option value="YES">YES</option> &nbsp;
+                                </select></td>
+                            <td style="width: 7.5301%; border: 2px solid rgb(0, 0, 0); padding:0;"><select class="cell-select">&nbsp;<option value="NO">NO</option>
+                                    <option value="YES">YES</option> &nbsp;
+                                </select></td>
+                            <td style="width: 7.6537%; border: 2px solid rgb(0, 0, 0); padding:0;"><select class="cell-select">&nbsp;<option value="NO">NO</option>
+                                    <option value="YES">YES</option> &nbsp;
+                                </select></td>
+                            <td style="border: 2px solid rgb(0, 0, 0); width: 7.3999%; padding:0;"><select class="cell-select">&nbsp;<option value="NO">NO</option>
+                                    <option value="YES">YES</option> &nbsp;
+                                </select></td>
+                            <td style="border: 2px solid rgb(0, 0, 0); width: 27.9665%; padding:0;"><input type="text" class="cell-input" style="height:100%;"></td>
+                        </tr>
+                        <tr>
+                            <td style="border: 2px solid rgb(0, 0, 0);"><span style="font-size: 11px;">12</span></td>
+                            <td class="text-left" style="border: 2px solid rgb(0, 0, 0); width: 24.7352%;"><span style="font-size: 11px;">Switchgear Equipment</span></td>
+                            <td style="border: 2px solid rgb(0, 0, 0); width: 7.203%; padding:0;"><select class="cell-select">&nbsp;<option value="NO">NO</option>
+                                    <option value="YES">YES</option> &nbsp;
+                                </select></td>
+                            <td style="width: 7.2343%; border: 2px solid rgb(0, 0, 0); padding:0;"><select class="cell-select">&nbsp;<option value="NO">NO</option>
+                                    <option value="YES">YES</option> &nbsp;
+                                </select></td>
+                            <td style="width: 7.0821%; border: 2px solid rgb(0, 0, 0); padding:0;"><select class="cell-select">&nbsp;<option value="NO">NO</option>
+                                    <option value="YES">YES</option> &nbsp;
+                                </select></td>
+                            <td style="width: 7.5301%; border: 2px solid rgb(0, 0, 0); padding:0;"><select class="cell-select">&nbsp;<option value="NO">NO</option>
+                                    <option value="YES">YES</option> &nbsp;
+                                </select></td>
+                            <td style="width: 7.6537%; border: 2px solid rgb(0, 0, 0); padding:0;"><select class="cell-select">&nbsp;<option value="NO">NO</option>
+                                    <option value="YES">YES</option> &nbsp;
+                                </select></td>
+                            <td style="border: 2px solid rgb(0, 0, 0); width: 7.3999%; padding:0;"><select class="cell-select">&nbsp;<option value="NO">NO</option>
+                                    <option value="YES">YES</option> &nbsp;
+                                </select></td>
+                            <td style="border: 2px solid rgb(0, 0, 0); width: 27.9665%; padding:0;"><input type="text" class="cell-input" style="height:100%;"></td>
+                        </tr>
+                        <tr>
+                            <td style="border: 2px solid rgb(0, 0, 0);"><span style="font-size: 11px;">13</span></td>
+                            <td class="text-left" style="border: 2px solid rgb(0, 0, 0); width: 24.7352%;"><span style="font-size: 11px;">Switchgear HV Test</span></td>
+                            <td style="border: 2px solid rgb(0, 0, 0); width: 7.203%; padding:0;"><select class="cell-select">&nbsp;<option value="NO">NO</option>
+                                    <option value="YES">YES</option> &nbsp;
+                                </select></td>
+                            <td style="width: 7.2343%; border: 2px solid rgb(0, 0, 0); padding:0;"><select class="cell-select">&nbsp;<option value="NO">NO</option>
+                                    <option value="YES">YES</option> &nbsp;
+                                </select></td>
+                            <td style="width: 7.0821%; border: 2px solid rgb(0, 0, 0); padding:0;"><select class="cell-select">&nbsp;<option value="NO">NO</option>
+                                    <option value="YES">YES</option> &nbsp;
+                                </select></td>
+                            <td style="width: 7.5301%; border: 2px solid rgb(0, 0, 0); padding:0;"><select class="cell-select">&nbsp;<option value="NO">NO</option>
+                                    <option value="YES">YES</option> &nbsp;
+                                </select></td>
+                            <td style="width: 7.6537%; border: 2px solid rgb(0, 0, 0); padding:0;"><select class="cell-select">&nbsp;<option value="NO">NO</option>
+                                    <option value="YES">YES</option> &nbsp;
+                                </select></td>
+                            <td style="border: 2px solid rgb(0, 0, 0); width: 7.3999%; padding:0;"><select class="cell-select">&nbsp;<option value="NO">NO</option>
+                                    <option value="YES">YES</option> &nbsp;
+                                </select></td>
+                            <td style="border: 2px solid rgb(0, 0, 0); width: 27.9665%; padding:0;"><input type="text" class="cell-input" style="height:100%;"></td>
+                        </tr>
+                        <tr>
+                            <td style="border: 2px solid rgb(0, 0, 0);"><span style="font-size: 11px;">14</span></td>
+                            <td class="text-left" style="border: 2px solid rgb(0, 0, 0); width: 24.7352%;"><span style="font-size: 11px;">Switchgear PD Test<sup><span style="color: rgb(255, 0, 0);">2)</span></sup></span></td>
+                            <td style="border: 2px solid rgb(0, 0, 0); width: 7.203%; padding:0;"><select class="cell-select">&nbsp;<option value="NO">NO</option>
+                                    <option value="YES">YES</option> &nbsp;
+                                </select></td>
+                            <td style="width: 7.2343%; border: 2px solid rgb(0, 0, 0); padding:0;"><select class="cell-select">&nbsp;<option value="NO">NO</option>
+                                    <option value="YES">YES</option> &nbsp;
+                                </select></td>
+                            <td style="width: 7.0821%; border: 2px solid rgb(0, 0, 0); padding:0;"><select class="cell-select">&nbsp;<option value="NO">NO</option>
+                                    <option value="YES">YES</option> &nbsp;
+                                </select></td>
+                            <td style="width: 7.5301%; border: 2px solid rgb(0, 0, 0); padding:0;"><select class="cell-select">&nbsp;<option value="NO">NO</option>
+                                    <option value="YES">YES</option> &nbsp;
+                                </select></td>
+                            <td style="width: 7.6537%; border: 2px solid rgb(0, 0, 0); padding:0;"><select class="cell-select">&nbsp;<option value="NO">NO</option>
+                                    <option value="YES">YES</option> &nbsp;
+                                </select></td>
+                            <td style="border: 2px solid rgb(0, 0, 0); width: 7.3999%; padding:0;"><select class="cell-select">&nbsp;<option value="NO">NO</option>
+                                    <option value="YES">YES</option> &nbsp;
+                                </select></td>
+                            <td style="border: 2px solid rgb(0, 0, 0); width: 27.9665%; padding:0;"><input type="text" class="cell-input" style="height:100%;"></td>
+                        </tr>
+                        <tr>
+                            <td style="border: 2px solid rgb(0, 0, 0);"><span style="font-size: 11px;">15</span></td>
+                            <td class="text-left" style="border: 2px solid rgb(0, 0, 0); width: 24.7352%;"><span style="font-size: 11px;">Scheme Check</span></td>
+                            <td style="border: 2px solid rgb(0, 0, 0); width: 7.203%; padding:0;"><select class="cell-select">&nbsp;<option value="NO">NO</option>
+                                    <option value="YES">YES</option> &nbsp;
+                                </select></td>
+                            <td style="width: 7.2343%; border: 2px solid rgb(0, 0, 0); padding:0;"><select class="cell-select">&nbsp;<option value="NO">NO</option>
+                                    <option value="YES">YES</option> &nbsp;
+                                </select></td>
+                            <td style="width: 7.0821%; border: 2px solid rgb(0, 0, 0); padding:0;"><select class="cell-select">&nbsp;<option value="NO">NO</option>
+                                    <option value="YES">YES</option> &nbsp;
+                                </select></td>
+                            <td style="width: 7.5301%; border: 2px solid rgb(0, 0, 0); padding:0;"><select class="cell-select">&nbsp;<option value="NO">NO</option>
+                                    <option value="YES">YES</option> &nbsp;
+                                </select></td>
+                            <td style="width: 7.6537%; border: 2px solid rgb(0, 0, 0); padding:0;"><select class="cell-select">&nbsp;<option value="NO">NO</option>
+                                    <option value="YES">YES</option> &nbsp;
+                                </select></td>
+                            <td style="border: 2px solid rgb(0, 0, 0); width: 7.3999%; padding:0;"><select class="cell-select">&nbsp;<option value="NO">NO</option>
+                                    <option value="YES">YES</option> &nbsp;
+                                </select></td>
+                            <td style="border: 2px solid rgb(0, 0, 0); width: 27.9665%; padding:0;"><input type="text" class="cell-input" style="height:100%;"></td>
+                        </tr>
+                        <tr>
+                            <td style="border: 2px solid rgb(0, 0, 0);"><span style="font-size: 11px;">16</span></td>
+                            <td class="text-left" style="border: 2px solid rgb(0, 0, 0); width: 24.7352%;"><span style="font-size: 11px;">CT Primary&amp;Secondary Injection</span></td>
+                            <td style="border: 2px solid rgb(0, 0, 0); width: 7.203%; padding:0;"><select class="cell-select">&nbsp;<option value="NO">NO</option>
+                                    <option value="YES">YES</option> &nbsp;
+                                </select></td>
+                            <td style="width: 7.2343%; border: 2px solid rgb(0, 0, 0); padding:0;"><select class="cell-select">&nbsp;<option value="NO">NO</option>
+                                    <option value="YES">YES</option> &nbsp;
+                                </select></td>
+                            <td style="width: 7.0821%; border: 2px solid rgb(0, 0, 0); padding:0;"><select class="cell-select">&nbsp;<option value="NO">NO</option>
+                                    <option value="YES">YES</option> &nbsp;
+                                </select></td>
+                            <td style="width: 7.5301%; border: 2px solid rgb(0, 0, 0); padding:0;"><select class="cell-select">&nbsp;<option value="NO">NO</option>
+                                    <option value="YES">YES</option> &nbsp;
+                                </select></td>
+                            <td style="width: 7.6537%; border: 2px solid rgb(0, 0, 0); padding:0;"><select class="cell-select">&nbsp;<option value="NO">NO</option>
+                                    <option value="YES">YES</option> &nbsp;
+                                </select></td>
+                            <td style="border: 2px solid rgb(0, 0, 0); width: 7.3999%; padding:0;"><select class="cell-select">&nbsp;<option value="NO">NO</option>
+                                    <option value="YES">YES</option> &nbsp;
+                                </select></td>
+                            <td style="border: 2px solid rgb(0, 0, 0); width: 27.9665%; padding:0;"><input type="text" class="cell-input" style="height:100%;"></td>
+                        </tr>
+                        <tr>
+                            <td style="border: 2px solid rgb(0, 0, 0);"><span style="font-size: 11px;">17</span></td>
+                            <td class="text-left" style="border: 2px solid rgb(0, 0, 0); width: 24.7352%;"><span style="font-size: 11px;">VT Secondary Injection</span></td>
+                            <td style="border: 2px solid rgb(0, 0, 0); width: 7.203%; padding:0;"><select class="cell-select">&nbsp;<option value="NO">NO</option>
+                                    <option value="YES">YES</option> &nbsp;
+                                </select></td>
+                            <td style="width: 7.2343%; border: 2px solid rgb(0, 0, 0); padding:0;"><select class="cell-select">&nbsp;<option value="NO">NO</option>
+                                    <option value="YES">YES</option> &nbsp;
+                                </select></td>
+                            <td style="width: 7.0821%; border: 2px solid rgb(0, 0, 0); padding:0;"><select class="cell-select">&nbsp;<option value="NO">NO</option>
+                                    <option value="YES">YES</option> &nbsp;
+                                </select></td>
+                            <td style="width: 7.5301%; border: 2px solid rgb(0, 0, 0); padding:0;"><select class="cell-select">&nbsp;<option value="NO">NO</option>
+                                    <option value="YES">YES</option> &nbsp;
+                                </select></td>
+                            <td style="width: 7.6537%; border: 2px solid rgb(0, 0, 0); padding:0;"><select class="cell-select">&nbsp;<option value="NO">NO</option>
+                                    <option value="YES">YES</option> &nbsp;
+                                </select></td>
+                            <td style="border: 2px solid rgb(0, 0, 0); width: 7.3999%; padding:0;"><select class="cell-select">&nbsp;<option value="NO">NO</option>
+                                    <option value="YES">YES</option> &nbsp;
+                                </select></td>
+                            <td style="border: 2px solid rgb(0, 0, 0); width: 27.9665%; padding:0;"><input type="text" class="cell-input" style="height:100%;"></td>
+                        </tr>
+                        <tr>
+                            <td style="border: 2px solid rgb(0, 0, 0);"><span style="font-size: 11px;">18</span></td>
+                            <td class="text-left" style="border: 2px solid rgb(0, 0, 0); width: 24.7352%;"><span style="font-size: 11px;">Simple Protection Relays</span></td>
+                            <td style="border: 2px solid rgb(0, 0, 0); width: 7.203%; padding:0;"><select class="cell-select">&nbsp;<option value="NO">NO</option>
+                                    <option value="YES">YES</option> &nbsp;
+                                </select></td>
+                            <td style="width: 7.2343%; border: 2px solid rgb(0, 0, 0); padding:0;"><select class="cell-select">&nbsp;<option value="NO">NO</option>
+                                    <option value="YES">YES</option> &nbsp;
+                                </select></td>
+                            <td style="width: 7.0821%; border: 2px solid rgb(0, 0, 0); padding:0;"><select class="cell-select">&nbsp;<option value="NO">NO</option>
+                                    <option value="YES">YES</option> &nbsp;
+                                </select></td>
+                            <td style="width: 7.5301%; border: 2px solid rgb(0, 0, 0); padding:0;"><select class="cell-select">&nbsp;<option value="NO">NO</option>
+                                    <option value="YES">YES</option> &nbsp;
+                                </select></td>
+                            <td style="width: 7.6537%; border: 2px solid rgb(0, 0, 0); padding:0;"><select class="cell-select">&nbsp;<option value="NO">NO</option>
+                                    <option value="YES">YES</option> &nbsp;
+                                </select></td>
+                            <td style="border: 2px solid rgb(0, 0, 0); width: 7.3999%; padding:0;"><select class="cell-select">&nbsp;<option value="NO">NO</option>
+                                    <option value="YES">YES</option> &nbsp;
+                                </select></td>
+                            <td style="border: 2px solid rgb(0, 0, 0); width: 27.9665%; padding:0;"><input type="text" class="cell-input" style="height:100%;"></td>
+                        </tr>
+                        <tr>
+                            <td style="border: 2px solid rgb(0, 0, 0);"><span style="font-size: 11px;">19</span></td>
+                            <td class="text-left" style="border: 2px solid rgb(0, 0, 0); width: 24.7352%;"><span style="font-size: 11px;">Advanced Protection&amp;Control IEDs</span></td>
+                            <td style="border: 2px solid rgb(0, 0, 0); width: 7.203%; padding:0;"><select class="cell-select">&nbsp;<option value="NO">NO</option>
+                                    <option value="YES">YES</option> &nbsp;
+                                </select></td>
+                            <td style="width: 7.2343%; border: 2px solid rgb(0, 0, 0); padding:0;"><select class="cell-select">&nbsp;<option value="NO">NO</option>
+                                    <option value="YES">YES</option> &nbsp;
+                                </select></td>
+                            <td style="width: 7.0821%; border: 2px solid rgb(0, 0, 0); padding:0;"><select class="cell-select">&nbsp;<option value="NO">NO</option>
+                                    <option value="YES">YES</option> &nbsp;
+                                </select></td>
+                            <td style="width: 7.5301%; border: 2px solid rgb(0, 0, 0); padding:0;"><select class="cell-select">&nbsp;<option value="NO">NO</option>
+                                    <option value="YES">YES</option> &nbsp;
+                                </select></td>
+                            <td style="width: 7.6537%; border: 2px solid rgb(0, 0, 0); padding:0;"><select class="cell-select">&nbsp;<option value="NO">NO</option>
+                                    <option value="YES">YES</option> &nbsp;
+                                </select></td>
+                            <td style="border: 2px solid rgb(0, 0, 0); width: 7.3999%; padding:0;"><select class="cell-select">&nbsp;<option value="NO">NO</option>
+                                    <option value="YES">YES</option> &nbsp;
+                                </select></td>
+                            <td style="border: 2px solid rgb(0, 0, 0); width: 27.9665%; padding:0;"><input type="text" class="cell-input" style="height:100%;"></td>
+                        </tr>
+                        <tr>
+                            <td style="border: 2px solid rgb(0, 0, 0);"><span style="font-size: 11px;">20</span></td>
+                            <td class="text-left" style="border: 2px solid rgb(0, 0, 0); width: 24.7352%;"><span style="font-size: 11px;">Stability Test</span></td>
+                            <td style="border: 2px solid rgb(0, 0, 0); width: 7.203%; padding:0;"><select class="cell-select">&nbsp;<option value="NO">NO</option>
+                                    <option value="YES">YES</option> &nbsp;
+                                </select></td>
+                            <td style="width: 7.2343%; border: 2px solid rgb(0, 0, 0); padding:0;"><select class="cell-select">&nbsp;<option value="NO">NO</option>
+                                    <option value="YES">YES</option> &nbsp;
+                                </select></td>
+                            <td style="width: 7.0821%; border: 2px solid rgb(0, 0, 0); padding:0;"><select class="cell-select">&nbsp;<option value="NO">NO</option>
+                                    <option value="YES">YES</option> &nbsp;
+                                </select></td>
+                            <td style="width: 7.5301%; border: 2px solid rgb(0, 0, 0); padding:0;"><select class="cell-select">&nbsp;<option value="NO">NO</option>
+                                    <option value="YES">YES</option> &nbsp;
+                                </select></td>
+                            <td style="width: 7.6537%; border: 2px solid rgb(0, 0, 0); padding:0;"><select class="cell-select">&nbsp;<option value="NO">NO</option>
+                                    <option value="YES">YES</option> &nbsp;
+                                </select></td>
+                            <td style="border: 2px solid rgb(0, 0, 0); width: 7.3999%; padding:0;"><select class="cell-select">&nbsp;<option value="NO">NO</option>
+                                    <option value="YES">YES</option> &nbsp;
+                                </select></td>
+                            <td style="border: 2px solid rgb(0, 0, 0); width: 27.9665%; padding:0;"><input type="text" class="cell-input" style="height:100%;"></td>
+                        </tr>
+                        <tr>
+                            <td style="border: 2px solid rgb(0, 0, 0);"><span style="font-size: 11px;">21</span></td>
+                            <td class="text-left" style="border: 2px solid rgb(0, 0, 0); width: 24.7352%;"><span style="font-size: 11px;">End To End Test</span></td>
+                            <td style="width: 7.203%; background-color: rgb(0, 0, 0); border: 2px solid rgb(0, 0, 0);"><br></td>
+                            <td style="width: 7.2343%; border: 2px solid rgb(0, 0, 0); padding:0;"><select class="cell-select">&nbsp;<option value="NO">NO</option>
+                                    <option value="YES">YES</option> &nbsp;
+                                </select></td>
+                            <td style="width: 7.0821%; border: 2px solid rgb(0, 0, 0); padding:0;"><select class="cell-select">&nbsp;<option value="NO">NO</option>
+                                    <option value="YES">YES</option> &nbsp;
+                                </select></td>
+                            <td style="width: 7.5301%; background-color: rgb(0, 0, 0); border: 2px solid rgb(0, 0, 0);"><br></td>
+                            <td style="width: 7.6537%; border: 2px solid rgb(0, 0, 0); padding:0;"><select class="cell-select">&nbsp;<option value="NO">NO</option>
+                                    <option value="YES">YES</option> &nbsp;
+                                </select></td>
+                            <td style="border: 2px solid rgb(0, 0, 0); width: 7.3999%; padding:0;"><select class="cell-select">&nbsp;<option value="NO">NO</option>
+                                    <option value="YES">YES</option> &nbsp;
+                                </select></td>
+                            <td style="border: 2px solid rgb(0, 0, 0); width: 27.9665%; padding:0;"><input type="text" class="cell-input" style="height:100%;"></td>
+                        </tr>
+                        <tr>
+                            <td style="border: 2px solid rgb(0, 0, 0);"><span style="font-size: 11px;">22</span></td>
+                            <td class="text-left" style="border: 2px solid rgb(0, 0, 0); width: 24.7352%;"><span style="font-size: 11px;">Final Trip Test</span></td>
+                            <td style="border: 2px solid rgb(0, 0, 0); width: 7.203%; padding:0;"><select class="cell-select">&nbsp;<option value="NO">NO</option>
+                                    <option value="YES">YES</option> &nbsp;
+                                </select></td>
+                            <td style="width: 7.2343%; border: 2px solid rgb(0, 0, 0); padding:0;"><select class="cell-select">&nbsp;<option value="NO">NO</option>
+                                    <option value="YES">YES</option> &nbsp;
+                                </select></td>
+                            <td style="width: 7.0821%; border: 2px solid rgb(0, 0, 0); padding:0;"><select class="cell-select">&nbsp;<option value="NO">NO</option>
+                                    <option value="YES">YES</option> &nbsp;
+                                </select></td>
+                            <td style="width: 7.5301%; border: 2px solid rgb(0, 0, 0); padding:0;"><select class="cell-select">&nbsp;<option value="NO">NO</option>
+                                    <option value="YES">YES</option> &nbsp;
+                                </select></td>
+                            <td style="width: 7.6537%; border: 2px solid rgb(0, 0, 0); padding:0;"><select class="cell-select">&nbsp;<option value="NO">NO</option>
+                                    <option value="YES">YES</option> &nbsp;
+                                </select></td>
+                            <td style="border: 2px solid rgb(0, 0, 0); width: 7.3999%; padding:0;"><select class="cell-select">&nbsp;<option value="NO">NO</option>
+                                    <option value="YES">YES</option> &nbsp;
+                                </select></td>
+                            <td style="border: 2px solid rgb(0, 0, 0); width: 27.9665%; padding:0;"><input type="text" class="cell-input" style="height:100%;"></td>
+                        </tr>
+                        <tr>
+                            <td style="border: 2px solid rgb(0, 0, 0);"><span style="font-size: 11px;">23</span></td>
+                            <td class="text-left" style="border: 2px solid rgb(0, 0, 0); width: 24.7352%;"><span style="font-size: 11px;">Live Substations<strong><span style="color: rgb(255, 0, 0);"><sup>3)</sup></span></strong></span></td>
+                            <td colspan="3" style="width: 21.4685%; border: 2px solid rgb(0, 0, 0); padding:0; text-align:center;"><select style="width:auto;border:none;outline:none;margin:0 auto;display:block;font-size:11px;font-family:Arial,Helvetica,sans-serif;cursor:pointer;text-align:center;">&nbsp;<option value="NO">NO</option>
+                                    <option value="YES">YES</option> &nbsp;
+                                </select></td>
+                            <td colspan="3" style="width: 22.5129%; border: 2px solid rgb(0, 0, 0); padding:0; text-align:center;"><select style="width:auto;border:none;outline:none;margin:0 auto;display:block;font-size:11px;font-family:Arial,Helvetica,sans-serif;cursor:pointer;text-align:center;">&nbsp;<option value="NO">NO</option>
+                                    <option value="YES">YES</option> &nbsp;
+                                </select></td>
+                            <td style="border: 2px solid rgb(0, 0, 0); width: 27.9665%; padding:0;"><input type="text" class="cell-input" style="height:100%;"></td>
+                        </tr>
+                        <tr>
+                            <td style="border: 2px solid rgb(0, 0, 0);"><span style="font-size: 11px;">24</span></td>
+                            <td class="text-left" style="border: 2px solid rgb(0, 0, 0); width: 24.7352%;"><span style="font-size: 11px;">Site Coordinator<sup><span style="color: rgb(255, 0, 0);">4)</span></sup></span></td>
+                            <td style="width: 7.203%; background-color: rgb(0, 0, 0); border: 2px solid rgb(0, 0, 0);"><br></td>
+                            <td style="width: 7.2343%; border: 2px solid rgb(0, 0, 0); padding:0;"><select class="cell-select">&nbsp;<option value="NO">NO</option>
+                                    <option value="YES">YES</option> &nbsp;
+                                </select></td>
+                            <td style="width: 7.0821%; border: 2px solid rgb(0, 0, 0); padding:0;"><select class="cell-select">&nbsp;<option value="NO">NO</option>
+                                    <option value="YES">YES</option> &nbsp;
+                                </select></td>
+                            <td style="width: 7.5301%; background-color: rgb(0, 0, 0); border: 2px solid rgb(0, 0, 0);"><br></td>
+                            <td style="width: 7.6537%; border: 2px solid rgb(0, 0, 0); padding:0;"><select class="cell-select">&nbsp;<option value="NO">NO</option>
+                                    <option value="YES">YES</option> &nbsp;
+                                </select></td>
+                            <td style="border: 2px solid rgb(0, 0, 0); width: 7.3999%; padding:0;"><select class="cell-select">&nbsp;<option value="NO">NO</option>
+                                    <option value="YES">YES</option> &nbsp;
+                                </select></td>
+                            <td style="border: 2px solid rgb(0, 0, 0); width: 27.9665%; padding:0;"><input type="text" class="cell-input" style="height:100%;"></td>
+                        </tr>
+                        <tr>
+                            <td style="width: 99.7175%; background-color: rgb(255, 255, 255); text-align: left; padding: 0px; vertical-align: top; line-height: 0; height: 4px; border-width: medium; border-style: none; border-color: rgb(0, 0, 0);" colspan="9">
+                                <div style="font-size:11px;font-family:Arial,Helvetica,sans-serif;line-height:1.2;padding:0px 1px;">Further Remarks:</div><textarea rows="4" class="cell-textarea" style="width:100%;border:none;outline:none;margin:0;padding:2px;font-size:11px;font-family:Arial,Helvetica,sans-serif;resize:none;display:block;box-sizing:border-box;"></textarea>
+                            </td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+            <div class="remarks-section">
+                <div class="remarks-notes" style="text-align: left; font-size: 10px; font-family: Arial, Helvetica, sans-serif; font-weight: normal; line-height: 1.4; padding: 1px 2px;"><span style="color: rgb(255, 0, 0);">1)</span> T&amp;C Contractor Engineer shall be certified by <strong>the Power Cable PD measuring unit manufacturer.</strong><br><span style="color: rgb(255, 0, 0);">2)</span> T&amp;C Contractor Engineer shall be certified by <strong>the Switchgear PD measuring unit manufacturer.</strong><br><span style="color: rgb(255, 0, 0);">3)</span> Full knowledge of <strong>the procedure (PR-NG-6460-008 Commissioning in Live Substation Projects)</strong> and no less than <strong>(1) year</strong> experience in KSA.<br><span style="color: rgb(255, 0, 0);">4)</span> Full knowledge of <strong>all CSD procedures</strong> and must be approved in the activities above <strong>No.3, 4, 15, 16, 17, 18, 19, 20, 21 and 22</strong> for the same voltage level.</div>
+            </div>
+            <div class="remarks-section">
+                <div class="remarks-title"><span style="font-size: 11px;"><strong><u>Note: Final approval is subjected to the performance at the site.</u></strong></span></div>
+                <table style="width: 100%; border-collapse: collapse; border: 1px solid rgb(0, 0, 0);">
+                    <tbody>
+                        <tr>
+                            <td style="width: 4.7946%; text-align: center; border: 1px solid rgb(0, 0, 0); background-color: rgb(255, 255, 255); height: 5px;"><span style="font-size: 11px;">#</span></td>
+                            <td style="width: 56.8304%; text-align: center; border: 1px solid rgb(0, 0, 0); background-color: rgb(255, 255, 255); height: 5px; padding: 5px;" colspan="2"><span style="font-size: 11px;">Examiner Name<br></span></td>
+                            <td style="width: 17.4553%; text-align: center; border: 1px solid rgb(0, 0, 0); background-color: rgb(255, 255, 255); height: 5px;"><span style="font-size: 11px;">Date<br></span></td>
+                            <td style="width: 22.1249%; text-align: center; border: 1px solid rgb(0, 0, 0); background-color: rgb(255, 255, 255); height: 5px;"><span style="font-size: 11px;">Signature</span></td>
+                        </tr>
+                        <tr>
+                            <td style="width: 4.7946%; text-align: center; border: 1px solid rgb(0, 0, 0); background-color: rgb(255, 255, 255); height: 20px;"><span style="font-size: 11px;">1</span></td>
+                            <td style="width: 56.8304%; border: 1px solid rgb(0, 0, 0); background-color: rgb(255, 255, 255); height: 20px; padding:0;" colspan="2"><input type="text" class="cell-input" style="font-size:11px;"></td>
+                            <td style="width: 17.4553%; border: 1px solid rgb(0, 0, 0); background-color: rgb(255, 255, 255); height: 20px; text-align: center; padding:2px;"><div class="date-cell"><input type="text" class="date-display" readonly placeholder=""><button type="button" class="date-cal-btn no-print" onclick="this.parentNode.querySelector('.date-hidden-picker').showPicker()">📅</button><input type="date" class="date-hidden-picker" onchange="formatDateField(this)"></div></td>
+                            <td style="width: 22.1249%; border: 1px solid rgb(0, 0, 0); background-color: rgb(255, 255, 255); height: 38px; text-align: center; padding:0; vertical-align:middle;">
+                                <div style="position:relative;width:100%;height:38px;overflow:hidden;"><img id="sig-img-ex1" src="" alt="" style="position:absolute;top:0;left:0;width:100%;height:100%;object-fit:contain;">
+                                    <div id="sig-btns-ex1" class="no-print" style="position:absolute;top:2px;right:2px;z-index:2;display:flex;gap:3px;"><label for="sig-input-ex1" title="Upload signature" style="cursor:pointer;background:rgba(255,255,255,0.85);border:1px solid #999;border-radius:3px;padding:2px 4px;font-size:13px;line-height:1;">🖉</label> <button onclick="clearSig('ex1')" title="Delete signature" style="background:rgba(255,255,255,0.85);border:1px solid #999;border-radius:3px;padding:2px 4px;font-size:13px;line-height:1;cursor:pointer;">🗑</button></div><input type="file" id="sig-input-ex1" accept="image/*" style="display:none;" onchange="loadSig(this,'ex1')">
+                                </div>
+                            </td>
+                        </tr>
+                        <tr>
+                            <td style="width: 4.7946%; text-align: center; border: 1px solid rgb(0, 0, 0); background-color: rgb(255, 255, 255); height: 20px;"><span style="font-size: 11px;">2</span></td>
+                            <td style="width: 56.8304%; border: 1px solid rgb(0, 0, 0); background-color: rgb(255, 255, 255); height: 20px; padding:0;" colspan="2"><input type="text" class="cell-input" style="font-size:11px;"></td>
+                            <td style="width: 17.4553%; border: 1px solid rgb(0, 0, 0); height: 20px; text-align: center; padding:2px;"><div class="date-cell"><input type="text" class="date-display" readonly placeholder=""><button type="button" class="date-cal-btn no-print" onclick="this.parentNode.querySelector('.date-hidden-picker').showPicker()">📅</button><input type="date" class="date-hidden-picker" onchange="formatDateField(this)"></div></td>
+                            <td style="width: 22.1249%; border: 1px solid rgb(0, 0, 0); height: 38px; text-align: center; padding:0; vertical-align:middle;">
+                                <div style="position:relative;width:100%;height:38px;overflow:hidden;"><img id="sig-img-ex2" src="" alt="" style="position:absolute;top:0;left:0;width:100%;height:100%;object-fit:contain;">
+                                    <div id="sig-btns-ex2" class="no-print" style="position:absolute;top:2px;right:2px;z-index:2;display:flex;gap:3px;"><label for="sig-input-ex2" title="Upload signature" style="cursor:pointer;background:rgba(255,255,255,0.85);border:1px solid #999;border-radius:3px;padding:2px 4px;font-size:13px;line-height:1;">🖉</label> <button onclick="clearSig('ex2')" title="Delete signature" style="background:rgba(255,255,255,0.85);border:1px solid #999;border-radius:3px;padding:2px 4px;font-size:13px;line-height:1;cursor:pointer;">🗑</button></div><input type="file" id="sig-input-ex2" accept="image/*" style="display:none;" onchange="loadSig(this,'ex2')">
+                                </div>
+                            </td>
+                        </tr>
+                        <tr>
+                            <td style="width: 29.3955%; border: 1px solid rgb(0, 0, 0); background-color: rgb(255, 255, 255); padding: 5px;" colspan="2"><span style="font-size: 11px;"><strong>Divisional Qualification Coordinator:</strong></span></td>
+                            <td style="width: 32.0881%; border: 1px solid rgb(0, 0, 0); background-color: rgb(255, 255, 255); padding:0;"><input type="text" class="cell-input" style="font-size:11px;"></td>
+                            <td style="width: 17.4553%; border: 1px solid rgb(0, 0, 0); background-color: rgb(255, 255, 255); padding:2px; text-align: center;"><div class="date-cell"><input type="text" class="date-display" readonly placeholder=""><button type="button" class="date-cal-btn no-print" onclick="this.parentNode.querySelector('.date-hidden-picker').showPicker()">📅</button><input type="date" class="date-hidden-picker" onchange="formatDateField(this)"></div></td>
+                            <td style="width: 22.1249%; border: 1px solid rgb(0, 0, 0); background-color: rgb(255, 255, 255); height: 38px; text-align: center; padding:0; vertical-align:middle;">
+                                <div style="position:relative;width:100%;height:38px;overflow:hidden;"><img id="sig-img-dqc" src="" alt="" style="position:absolute;top:0;left:0;width:100%;height:100%;object-fit:contain;">
+                                    <div id="sig-btns-dqc" class="no-print" style="position:absolute;top:2px;right:2px;z-index:2;display:flex;gap:3px;"><label for="sig-input-dqc" title="Upload signature" style="cursor:pointer;background:rgba(255,255,255,0.85);border:1px solid #999;border-radius:3px;padding:2px 4px;font-size:13px;line-height:1;">🖉</label> <button onclick="clearSig('dqc')" title="Delete signature" style="background:rgba(255,255,255,0.85);border:1px solid #999;border-radius:3px;padding:2px 4px;font-size:13px;line-height:1;cursor:pointer;">🗑</button></div><input type="file" id="sig-input-dqc" accept="image/*" style="display:none;" onchange="loadSig(this,'dqc')">
+                                </div>
+                            </td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+    <script>
+        function loadSig(input, uid) {
+          var file = input.files[0];
+          if (!file) return;
+          var reader = new FileReader();
+          reader.onload = function(e) {
+            var img = document.getElementById('sig-img-' + uid);
+            img.src = e.target.result;
+            img.style.display = 'block';
+          };
+          reader.readAsDataURL(file);
+          input.value = '';
+        }
+        function clearSig(uid) {
+          var img = document.getElementById('sig-img-' + uid);
+          img.src = '';
+          img.style.display = 'none';
+        }
+
+        /* Date formatting: dd-MMM-yyyy */
+        function formatDateField(picker) {
+          var val = picker.value;
+          var display = picker.parentNode.querySelector('.date-display');
+          if (!val || !display) { if(display) display.value = ''; return; }
+          var months = ['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
+          var parts = val.split('-');
+          var y = parts[0];
+          var m = parseInt(parts[1], 10) - 1;
+          var d = parts[2];
+          display.value = d + '-' + months[m] + '-' + y;
+        }
+    </script>
+</body>
+
+</html>
