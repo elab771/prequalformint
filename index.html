@@ -221,6 +221,121 @@
 
         .no-print {}
 
+        /* Upload mode styles */
+        .upload-mode-locked {
+            pointer-events: none !important;
+            cursor: not-allowed !important;
+            user-select: none !important;
+        }
+
+        .qual-blank-highlight {
+            background-color: #ffe0e0 !important;
+            border: 1px solid #e00 !important;
+            outline: 2px solid #e00 !important;
+        }
+
+        .flattened-cell-value {
+            display: block;
+            width: 100%;
+            text-align: center;
+            font-size: 11px;
+            font-family: Arial, Helvetica, sans-serif;
+            user-select: none;
+        }
+
+        /* Upload button styling */
+        .upload-btn {
+            background-color: #1a7f4b;
+            color: #fff;
+            border: none;
+            padding: 8px 18px;
+            font-size: 13px;
+            font-weight: bold;
+            border-radius: 4px;
+            cursor: pointer;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.15);
+            margin-right: 8px;
+        }
+
+        .upload-btn:hover {
+            background-color: #155f39;
+        }
+
+        /* Modal overlay */
+        #upload-modal {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: rgba(0, 0, 0, 0.5);
+            z-index: 9999;
+            align-items: center;
+            justify-content: center;
+        }
+
+        #upload-modal.active {
+            display: flex;
+        }
+
+        #upload-modal-box {
+            background: #fff;
+            border-radius: 8px;
+            padding: 28px 32px;
+            min-width: 340px;
+            max-width: 480px;
+            box-shadow: 0 4px 24px rgba(0, 0, 0, 0.22);
+            font-family: Arial, sans-serif;
+        }
+
+        #upload-modal-box h3 {
+            margin: 0 0 14px 0;
+            font-size: 16px;
+            color: #222;
+        }
+
+        #upload-modal-box p {
+            font-size: 13px;
+            color: #555;
+            margin: 0 0 18px 0;
+        }
+
+        #upload-modal-box .modal-btns {
+            display: flex;
+            gap: 10px;
+            justify-content: flex-end;
+            margin-top: 10px;
+        }
+
+        #upload-modal-box .modal-btn-cancel {
+            background: #e0e0e0;
+            color: #333;
+            border: none;
+            padding: 7px 18px;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 13px;
+        }
+
+        #upload-modal-box .modal-btn-ok {
+            background: #1a7f4b;
+            color: #fff;
+            border: none;
+            padding: 7px 18px;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 13px;
+            font-weight: bold;
+        }
+
+        #upload-modal-box .modal-msg {
+            color: #c00;
+            font-size: 12px;
+            margin-top: 8px;
+            display: none;
+        }
+
         @media print {
             .no-print {
                 display: none !important;
@@ -251,23 +366,78 @@
                 border: none;
                 background: transparent;
             }
+
+            /* Flatten: remove highlight on print */
+            .qual-blank-highlight {
+                background-color: transparent !important;
+                border: none !important;
+                outline: none !important;
+            }
         }
     </style>
     <style>
         /* Date picker styling */
-        .date-cell { position:relative; display:flex; align-items:center; gap:2px; }
-        .date-display { flex:1; border:none; outline:none; font-size:11px; font-family:Arial,Helvetica,sans-serif; text-align:center; cursor:default; background:transparent; }
-        .date-cal-btn { background:none; border:none; cursor:pointer; font-size:13px; padding:0 2px; line-height:1; color:#333; }
-        .date-cal-btn:hover { color:#0056b3; }
-        .date-hidden-picker { position:absolute; top:0; left:0; width:0; height:0; opacity:0; pointer-events:none; }
+        .date-cell {
+            position: relative;
+            display: flex;
+            align-items: center;
+            gap: 2px;
+        }
+
+        .date-display {
+            flex: 1;
+            border: none;
+            outline: none;
+            font-size: 11px;
+            font-family: Arial, Helvetica, sans-serif;
+            text-align: center;
+            cursor: default;
+            background: transparent;
+        }
+
+        .date-cal-btn {
+            background: none;
+            border: none;
+            cursor: pointer;
+            font-size: 13px;
+            padding: 0 2px;
+            line-height: 1;
+            color: #333;
+        }
+
+        .date-cal-btn:hover {
+            color: #0056b3;
+        }
+
+        .date-hidden-picker {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 0;
+            height: 0;
+            opacity: 0;
+            pointer-events: none;
+        }
+
         @media print {
-            .date-cal-btn { display:none !important; }
+            .date-cal-btn {
+                display: none !important;
+            }
         }
     </style>
 </head>
 
-<body>
-    <div class="action-bar"><button class="print-btn" onclick="window.print()">Print Form</button></div>
+<body><!-- PDF.js CDN -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.min.js"></script><!-- Upload modal -->
+    <div id="upload-modal">
+        <div id="upload-modal-box">
+            <h3>Upload Pre-Qualification Form</h3>
+            <p>Please select the <strong>prequalform.pdf</strong> file to upload. Only the first page will be processed.</p><input type="file" id="pdf-file-input" accept="application/pdf" style="font-size:13px;margin-bottom:4px;">
+            <div class="modal-msg" id="upload-modal-msg"><br></div>
+            <div class="modal-btns"><button class="modal-btn-cancel" onclick="closeUploadModal()">Cancel</button> <button class="modal-btn-ok" onclick="processUploadedPDF()">Upload</button></div>
+        </div>
+    </div>
+    <div class="action-bar"><button class="upload-btn no-print" onclick="openUploadModal()">📄 Upload PDF</button> <button class="print-btn" onclick="validateAndPrint()">Print Form</button></div>
     <div class="page-container">
         <table class="top-header-table" style="border-collapse: collapse; border: rgb(0, 0, 0); width: 100%; padding: 1px;">
             <tbody>
@@ -342,11 +512,11 @@
                             <th rowspan="2" style="width: 27.9665%; border: 2px solid rgb(0, 0, 0);"><span style="font-size: 12px;">REMARKS</span></th>
                         </tr>
                         <tr>
-                            <th style="width: 7.203%; border: 2px solid rgb(0, 0, 0);"><span style="font-size: 12px;">HV</span></th>
-                            <th style="width: 7.2343%; border: 2px solid rgb(0, 0, 0);"><span style="font-size: 12px;">MV</span></th>
+                            <th style="width: 7.203%; border: 2px solid rgb(0, 0, 0);"><span style="font-size: 12px;">MV</span></th>
+                            <th style="width: 7.2343%; border: 2px solid rgb(0, 0, 0);"><span style="font-size: 12px;">HV</span></th>
                             <th style="width: 7.0821%; border: 2px solid rgb(0, 0, 0);"><span style="font-size: 12px;">EHV</span></th>
-                            <th style="width: 7.5301%; border: 2px solid rgb(0, 0, 0);"><span style="font-size: 12px;">HV</span></th>
-                            <th style="width: 7.6537%; border: 2px solid rgb(0, 0, 0);"><span style="font-size: 12px;">MV</span></th>
+                            <th style="width: 7.5301%; border: 2px solid rgb(0, 0, 0);"><span style="font-size: 12px;">MV</span></th>
+                            <th style="width: 7.6537%; border: 2px solid rgb(0, 0, 0);"><span style="font-size: 12px;">HV</span></th>
                             <th style="width: 7.3999%; border: 2px solid rgb(0, 0, 0);"><span style="font-size: 12px;">EHV</span></th>
                         </tr>
                     </thead>
@@ -355,10 +525,10 @@
                             <td style="border: 2px solid rgb(0, 0, 0);"><span style="font-size: 11px;">1</span></td>
                             <td class="text-left" style="border: 2px solid rgb(0, 0, 0); width: 24.7352%;"><span style="font-size: 11px;">Batteries&amp;Chargers</span></td>
                             <td colspan="3" style="width: 21.4685%; border: 2px solid rgb(0, 0, 0); padding:0; text-align:center;"><select style="width:auto;border:none;outline:none;margin:0 auto;display:block;font-size:11px;font-family:Arial,Helvetica,sans-serif;cursor:pointer;text-align:center;">&nbsp;<option value="NO">NO</option>
-                                    <option value="YES">YES</option> &nbsp;
+                                    <option value="YES">YES</option>&nbsp; &nbsp;
                                 </select></td>
                             <td colspan="3" style="width: 22.5129%; border: 2px solid rgb(0, 0, 0); padding:0; text-align:center;"><select style="width:auto;border:none;outline:none;margin:0 auto;display:block;font-size:11px;font-family:Arial,Helvetica,sans-serif;cursor:pointer;text-align:center;">&nbsp;<option value="NO">NO</option>
-                                    <option value="YES">YES</option> &nbsp;
+                                    <option value="YES">YES</option>&nbsp; &nbsp;
                                 </select></td>
                             <td style="border: 2px solid rgb(0, 0, 0); width: 27.9665%; padding:0;"><input type="text" class="cell-input" style="height:100%;"></td>
                         </tr>
@@ -366,10 +536,10 @@
                             <td style="border: 2px solid rgb(0, 0, 0);"><span style="font-size: 11px;">2</span></td>
                             <td class="text-left" style="border: 2px solid rgb(0, 0, 0); width: 24.7352%;"><span style="font-size: 11px;">ACDB&amp;DCDB</span></td>
                             <td colspan="3" style="width: 21.4685%; border: 2px solid rgb(0, 0, 0); padding:0; text-align:center;"><select style="width:auto;border:none;outline:none;margin:0 auto;display:block;font-size:11px;font-family:Arial,Helvetica,sans-serif;cursor:pointer;text-align:center;">&nbsp;<option value="NO">NO</option>
-                                    <option value="YES">YES</option> &nbsp;
+                                    <option value="YES">YES</option>&nbsp; &nbsp;
                                 </select></td>
                             <td colspan="3" style="width: 22.5129%; border: 2px solid rgb(0, 0, 0); padding:0; text-align:center;"><select style="width:auto;border:none;outline:none;margin:0 auto;display:block;font-size:11px;font-family:Arial,Helvetica,sans-serif;cursor:pointer;text-align:center;">&nbsp;<option value="NO">NO</option>
-                                    <option value="YES">YES</option> &nbsp;
+                                    <option value="YES">YES</option>&nbsp; &nbsp;
                                 </select></td>
                             <td style="border: 2px solid rgb(0, 0, 0); width: 27.9665%; padding:0;"><input type="text" class="cell-input" style="height:100%;"></td>
                         </tr>
@@ -377,10 +547,10 @@
                             <td style="border: 2px solid rgb(0, 0, 0);"><span style="font-size: 11px;">3</span></td>
                             <td class="text-left" style="border: 2px solid rgb(0, 0, 0); width: 24.7352%;"><span style="font-size: 11px;">Aux./Trip Relays&amp;MCCB</span></td>
                             <td colspan="3" style="width: 21.4685%; border: 2px solid rgb(0, 0, 0); padding:0; text-align:center;"><select style="width:auto;border:none;outline:none;margin:0 auto;display:block;font-size:11px;font-family:Arial,Helvetica,sans-serif;cursor:pointer;text-align:center;">&nbsp;<option value="NO">NO</option>
-                                    <option value="YES">YES</option> &nbsp;
+                                    <option value="YES">YES</option>&nbsp; &nbsp;
                                 </select></td>
                             <td colspan="3" style="width: 22.5129%; border: 2px solid rgb(0, 0, 0); padding:0; text-align:center;"><select style="width:auto;border:none;outline:none;margin:0 auto;display:block;font-size:11px;font-family:Arial,Helvetica,sans-serif;cursor:pointer;text-align:center;">&nbsp;<option value="NO">NO</option>
-                                    <option value="YES">YES</option> &nbsp;
+                                    <option value="YES">YES</option>&nbsp; &nbsp;
                                 </select></td>
                             <td style="border: 2px solid rgb(0, 0, 0); width: 27.9665%; padding:0;"><input type="text" class="cell-input" style="height:100%;"></td>
                         </tr>
@@ -388,10 +558,10 @@
                             <td style="border: 2px solid rgb(0, 0, 0);"><span style="font-size: 11px;">4</span></td>
                             <td class="text-left" style="border: 2px solid rgb(0, 0, 0); width: 24.7352%;"><span style="font-size: 11px;">Meters</span></td>
                             <td colspan="3" style="width: 21.4685%; border: 2px solid rgb(0, 0, 0); padding:0; text-align:center;"><select style="width:auto;border:none;outline:none;margin:0 auto;display:block;font-size:11px;font-family:Arial,Helvetica,sans-serif;cursor:pointer;text-align:center;">&nbsp;<option value="NO">NO</option>
-                                    <option value="YES">YES</option> &nbsp;
+                                    <option value="YES">YES</option>&nbsp; &nbsp;
                                 </select></td>
                             <td colspan="3" style="width: 22.5129%; border: 2px solid rgb(0, 0, 0); padding:0; text-align:center;"><select style="width:auto;border:none;outline:none;margin:0 auto;display:block;font-size:11px;font-family:Arial,Helvetica,sans-serif;cursor:pointer;text-align:center;">&nbsp;<option value="NO">NO</option>
-                                    <option value="YES">YES</option> &nbsp;
+                                    <option value="YES">YES</option>&nbsp; &nbsp;
                                 </select></td>
                             <td style="border: 2px solid rgb(0, 0, 0); width: 27.9665%; padding:0;"><input type="text" class="cell-input" style="height:100%;"></td>
                         </tr>
@@ -399,22 +569,22 @@
                             <td style="border: 2px solid rgb(0, 0, 0);"><span style="font-size: 11px;">5</span></td>
                             <td class="text-left" style="border: 2px solid rgb(0, 0, 0); width: 24.7352%;"><span style="font-size: 11px;">Power Transformer</span></td>
                             <td style="border: 2px solid rgb(0, 0, 0); width: 7.203%; padding:0;"><select class="cell-select">&nbsp;<option value="NO">NO</option>
-                                    <option value="YES">YES</option> &nbsp;
+                                    <option value="YES">YES</option>&nbsp; &nbsp;
                                 </select></td>
                             <td style="width: 7.2343%; border: 2px solid rgb(0, 0, 0); padding:0;"><select class="cell-select">&nbsp;<option value="NO">NO</option>
-                                    <option value="YES">YES</option> &nbsp;
+                                    <option value="YES">YES</option>&nbsp; &nbsp;
                                 </select></td>
                             <td style="width: 7.0821%; border: 2px solid rgb(0, 0, 0); padding:0;"><select class="cell-select">&nbsp;<option value="NO">NO</option>
-                                    <option value="YES">YES</option> &nbsp;
+                                    <option value="YES">YES</option>&nbsp; &nbsp;
                                 </select></td>
                             <td style="width: 7.5301%; border: 2px solid rgb(0, 0, 0); padding:0;"><select class="cell-select">&nbsp;<option value="NO">NO</option>
-                                    <option value="YES">YES</option> &nbsp;
+                                    <option value="YES">YES</option>&nbsp; &nbsp;
                                 </select></td>
                             <td style="width: 7.6537%; border: 2px solid rgb(0, 0, 0); padding:0;"><select class="cell-select">&nbsp;<option value="NO">NO</option>
-                                    <option value="YES">YES</option> &nbsp;
+                                    <option value="YES">YES</option>&nbsp; &nbsp;
                                 </select></td>
                             <td style="border: 2px solid rgb(0, 0, 0); width: 7.3999%; padding:0;"><select class="cell-select">&nbsp;<option value="NO">NO</option>
-                                    <option value="YES">YES</option> &nbsp;
+                                    <option value="YES">YES</option>&nbsp; &nbsp;
                                 </select></td>
                             <td style="border: 2px solid rgb(0, 0, 0); width: 27.9665%; padding:0;"><input type="text" class="cell-input" style="height:100%;"></td>
                         </tr>
@@ -422,22 +592,22 @@
                             <td style="border: 2px solid rgb(0, 0, 0);"><span style="font-size: 11px;">6</span></td>
                             <td class="text-left" style="border: 2px solid rgb(0, 0, 0); width: 24.7352%;"><span style="font-size: 11px;">Shunt Reactor</span></td>
                             <td style="border: 2px solid rgb(0, 0, 0); width: 7.203%; padding:0;"><select class="cell-select">&nbsp;<option value="NO">NO</option>
-                                    <option value="YES">YES</option> &nbsp;
+                                    <option value="YES">YES</option>&nbsp; &nbsp;
                                 </select></td>
                             <td style="width: 7.2343%; border: 2px solid rgb(0, 0, 0); padding:0;"><select class="cell-select">&nbsp;<option value="NO">NO</option>
-                                    <option value="YES">YES</option> &nbsp;
+                                    <option value="YES">YES</option>&nbsp; &nbsp;
                                 </select></td>
                             <td style="width: 7.0821%; border: 2px solid rgb(0, 0, 0); padding:0;"><select class="cell-select">&nbsp;<option value="NO">NO</option>
-                                    <option value="YES">YES</option> &nbsp;
+                                    <option value="YES">YES</option>&nbsp; &nbsp;
                                 </select></td>
                             <td style="width: 7.5301%; border: 2px solid rgb(0, 0, 0); padding:0;"><select class="cell-select">&nbsp;<option value="NO">NO</option>
-                                    <option value="YES">YES</option> &nbsp;
+                                    <option value="YES">YES</option>&nbsp; &nbsp;
                                 </select></td>
                             <td style="width: 7.6537%; border: 2px solid rgb(0, 0, 0); padding:0;"><select class="cell-select">&nbsp;<option value="NO">NO</option>
-                                    <option value="YES">YES</option> &nbsp;
+                                    <option value="YES">YES</option>&nbsp; &nbsp;
                                 </select></td>
                             <td style="border: 2px solid rgb(0, 0, 0); width: 7.3999%; padding:0;"><select class="cell-select">&nbsp;<option value="NO">NO</option>
-                                    <option value="YES">YES</option> &nbsp;
+                                    <option value="YES">YES</option>&nbsp; &nbsp;
                                 </select></td>
                             <td style="border: 2px solid rgb(0, 0, 0); width: 27.9665%; padding:0;"><input type="text" class="cell-input" style="height:100%;"></td>
                         </tr>
@@ -445,22 +615,22 @@
                             <td style="border: 2px solid rgb(0, 0, 0);"><span style="font-size: 11px;">7</span></td>
                             <td class="text-left" style="border: 2px solid rgb(0, 0, 0); width: 24.7352%;"><span style="font-size: 11px;">Capacitor</span></td>
                             <td style="border: 2px solid rgb(0, 0, 0); width: 7.203%; padding:0;"><select class="cell-select">&nbsp;<option value="NO">NO</option>
-                                    <option value="YES">YES</option> &nbsp;
+                                    <option value="YES">YES</option>&nbsp; &nbsp;
                                 </select></td>
                             <td style="width: 7.2343%; border: 2px solid rgb(0, 0, 0); padding:0;"><select class="cell-select">&nbsp;<option value="NO">NO</option>
-                                    <option value="YES">YES</option> &nbsp;
+                                    <option value="YES">YES</option>&nbsp; &nbsp;
                                 </select></td>
                             <td style="width: 7.0821%; border: 2px solid rgb(0, 0, 0); padding:0;"><select class="cell-select">&nbsp;<option value="NO">NO</option>
-                                    <option value="YES">YES</option> &nbsp;
+                                    <option value="YES">YES</option>&nbsp; &nbsp;
                                 </select></td>
                             <td style="width: 7.5301%; border: 2px solid rgb(0, 0, 0); padding:0;"><select class="cell-select">&nbsp;<option value="NO">NO</option>
-                                    <option value="YES">YES</option> &nbsp;
+                                    <option value="YES">YES</option>&nbsp; &nbsp;
                                 </select></td>
                             <td style="width: 7.6537%; border: 2px solid rgb(0, 0, 0); padding:0;"><select class="cell-select">&nbsp;<option value="NO">NO</option>
-                                    <option value="YES">YES</option> &nbsp;
+                                    <option value="YES">YES</option>&nbsp; &nbsp;
                                 </select></td>
                             <td style="border: 2px solid rgb(0, 0, 0); width: 7.3999%; padding:0;"><select class="cell-select">&nbsp;<option value="NO">NO</option>
-                                    <option value="YES">YES</option> &nbsp;
+                                    <option value="YES">YES</option>&nbsp; &nbsp;
                                 </select></td>
                             <td style="border: 2px solid rgb(0, 0, 0); width: 27.9665%; padding:0;"><input type="text" class="cell-input" style="height:100%;"></td>
                         </tr>
@@ -468,10 +638,10 @@
                             <td style="border: 2px solid rgb(0, 0, 0);"><span style="font-size: 11px;">8</span></td>
                             <td class="text-left" style="border: 2px solid rgb(0, 0, 0); width: 24.7352%;"><span style="font-size: 11px;">OHTL</span></td>
                             <td colspan="3" style="width: 21.4685%; border: 2px solid rgb(0, 0, 0); padding:0; text-align:center;"><select style="width:auto;border:none;outline:none;margin:0 auto;display:block;font-size:11px;font-family:Arial,Helvetica,sans-serif;cursor:pointer;text-align:center;">&nbsp;<option value="NO">NO</option>
-                                    <option value="YES">YES</option> &nbsp;
+                                    <option value="YES">YES</option>&nbsp; &nbsp;
                                 </select></td>
                             <td style="width: 22.5129%; border: 2px solid rgb(0, 0, 0); padding:0; text-align:center;" colspan="3"><select style="width:auto;border:none;outline:none;margin:0 auto;display:block;font-size:11px;font-family:Arial,Helvetica,sans-serif;cursor:pointer;text-align:center;">&nbsp;<option value="NO">NO</option>
-                                    <option value="YES">YES</option> &nbsp;
+                                    <option value="YES">YES</option>&nbsp; &nbsp;
                                 </select></td>
                             <td style="border: 2px solid rgb(0, 0, 0); width: 27.9665%; padding:0;"><input type="text" class="cell-input" style="height:100%;"></td>
                         </tr>
@@ -479,22 +649,22 @@
                             <td style="border: 2px solid rgb(0, 0, 0);"><span style="font-size: 11px;">9</span></td>
                             <td class="text-left" style="border: 2px solid rgb(0, 0, 0); width: 24.7352%;"><span style="font-size: 11px;">Power Cable Electrical Tests</span></td>
                             <td style="border: 2px solid rgb(0, 0, 0); width: 7.203%; padding:0;"><select class="cell-select">&nbsp;<option value="NO">NO</option>
-                                    <option value="YES">YES</option> &nbsp;
+                                    <option value="YES">YES</option>&nbsp; &nbsp;
                                 </select></td>
                             <td style="width: 7.2343%; border: 2px solid rgb(0, 0, 0); padding:0;"><select class="cell-select">&nbsp;<option value="NO">NO</option>
-                                    <option value="YES">YES</option> &nbsp;
+                                    <option value="YES">YES</option>&nbsp; &nbsp;
                                 </select></td>
                             <td style="width: 7.0821%; border: 2px solid rgb(0, 0, 0); padding:0;"><select class="cell-select">&nbsp;<option value="NO">NO</option>
-                                    <option value="YES">YES</option> &nbsp;
+                                    <option value="YES">YES</option>&nbsp; &nbsp;
                                 </select></td>
                             <td style="width: 7.5301%; border: 2px solid rgb(0, 0, 0); padding:0;"><select class="cell-select">&nbsp;<option value="NO">NO</option>
-                                    <option value="YES">YES</option> &nbsp;
+                                    <option value="YES">YES</option>&nbsp; &nbsp;
                                 </select></td>
                             <td style="width: 7.6537%; border: 2px solid rgb(0, 0, 0); padding:0;"><select class="cell-select">&nbsp;<option value="NO">NO</option>
-                                    <option value="YES">YES</option> &nbsp;
+                                    <option value="YES">YES</option>&nbsp; &nbsp;
                                 </select></td>
                             <td style="border: 2px solid rgb(0, 0, 0); width: 7.3999%; padding:0;"><select class="cell-select">&nbsp;<option value="NO">NO</option>
-                                    <option value="YES">YES</option> &nbsp;
+                                    <option value="YES">YES</option>&nbsp; &nbsp;
                                 </select></td>
                             <td style="border: 2px solid rgb(0, 0, 0); width: 27.9665%; padding:0;"><input type="text" class="cell-input" style="height:100%;"></td>
                         </tr>
@@ -502,22 +672,22 @@
                             <td style="border: 2px solid rgb(0, 0, 0);"><span style="font-size: 11px;">10</span></td>
                             <td class="text-left" style="border: 2px solid rgb(0, 0, 0); width: 24.7352%;"><span style="font-size: 11px;">Power Cable HV Test</span></td>
                             <td style="border: 2px solid rgb(0, 0, 0); width: 7.203%; padding:0;"><select class="cell-select">&nbsp;<option value="NO">NO</option>
-                                    <option value="YES">YES</option> &nbsp;
+                                    <option value="YES">YES</option>&nbsp; &nbsp;
                                 </select></td>
                             <td style="width: 7.2343%; border: 2px solid rgb(0, 0, 0); padding:0;"><select class="cell-select">&nbsp;<option value="NO">NO</option>
-                                    <option value="YES">YES</option> &nbsp;
+                                    <option value="YES">YES</option>&nbsp; &nbsp;
                                 </select></td>
                             <td style="width: 7.0821%; border: 2px solid rgb(0, 0, 0); padding:0;"><select class="cell-select">&nbsp;<option value="NO">NO</option>
-                                    <option value="YES">YES</option> &nbsp;
+                                    <option value="YES">YES</option>&nbsp; &nbsp;
                                 </select></td>
                             <td style="width: 7.5301%; border: 2px solid rgb(0, 0, 0); padding:0;"><select class="cell-select">&nbsp;<option value="NO">NO</option>
-                                    <option value="YES">YES</option> &nbsp;
+                                    <option value="YES">YES</option>&nbsp; &nbsp;
                                 </select></td>
                             <td style="width: 7.6537%; border: 2px solid rgb(0, 0, 0); padding:0;"><select class="cell-select">&nbsp;<option value="NO">NO</option>
-                                    <option value="YES">YES</option> &nbsp;
+                                    <option value="YES">YES</option>&nbsp; &nbsp;
                                 </select></td>
                             <td style="border: 2px solid rgb(0, 0, 0); width: 7.3999%; padding:0;"><select class="cell-select">&nbsp;<option value="NO">NO</option>
-                                    <option value="YES">YES</option> &nbsp;
+                                    <option value="YES">YES</option>&nbsp; &nbsp;
                                 </select></td>
                             <td style="border: 2px solid rgb(0, 0, 0); width: 27.9665%; padding:0;"><input type="text" class="cell-input" style="height:100%;"></td>
                         </tr>
@@ -525,22 +695,22 @@
                             <td style="border: 2px solid rgb(0, 0, 0);"><span style="font-size: 11px;">11</span></td>
                             <td class="text-left" style="border: 2px solid rgb(0, 0, 0); width: 24.7352%;"><span style="font-size: 11px;">Power Cable PD Test<sup><span style="color: rgb(255, 0, 0);">1)</span></sup></span></td>
                             <td style="border: 2px solid rgb(0, 0, 0); width: 7.203%; padding:0;"><select class="cell-select">&nbsp;<option value="NO">NO</option>
-                                    <option value="YES">YES</option> &nbsp;
+                                    <option value="YES">YES</option>&nbsp; &nbsp;
                                 </select></td>
                             <td style="width: 7.2343%; border: 2px solid rgb(0, 0, 0); padding:0;"><select class="cell-select">&nbsp;<option value="NO">NO</option>
-                                    <option value="YES">YES</option> &nbsp;
+                                    <option value="YES">YES</option>&nbsp; &nbsp;
                                 </select></td>
                             <td style="width: 7.0821%; border: 2px solid rgb(0, 0, 0); padding:0;"><select class="cell-select">&nbsp;<option value="NO">NO</option>
-                                    <option value="YES">YES</option> &nbsp;
+                                    <option value="YES">YES</option>&nbsp; &nbsp;
                                 </select></td>
                             <td style="width: 7.5301%; border: 2px solid rgb(0, 0, 0); padding:0;"><select class="cell-select">&nbsp;<option value="NO">NO</option>
-                                    <option value="YES">YES</option> &nbsp;
+                                    <option value="YES">YES</option>&nbsp; &nbsp;
                                 </select></td>
                             <td style="width: 7.6537%; border: 2px solid rgb(0, 0, 0); padding:0;"><select class="cell-select">&nbsp;<option value="NO">NO</option>
-                                    <option value="YES">YES</option> &nbsp;
+                                    <option value="YES">YES</option>&nbsp; &nbsp;
                                 </select></td>
                             <td style="border: 2px solid rgb(0, 0, 0); width: 7.3999%; padding:0;"><select class="cell-select">&nbsp;<option value="NO">NO</option>
-                                    <option value="YES">YES</option> &nbsp;
+                                    <option value="YES">YES</option>&nbsp; &nbsp;
                                 </select></td>
                             <td style="border: 2px solid rgb(0, 0, 0); width: 27.9665%; padding:0;"><input type="text" class="cell-input" style="height:100%;"></td>
                         </tr>
@@ -548,22 +718,22 @@
                             <td style="border: 2px solid rgb(0, 0, 0);"><span style="font-size: 11px;">12</span></td>
                             <td class="text-left" style="border: 2px solid rgb(0, 0, 0); width: 24.7352%;"><span style="font-size: 11px;">Switchgear Equipment</span></td>
                             <td style="border: 2px solid rgb(0, 0, 0); width: 7.203%; padding:0;"><select class="cell-select">&nbsp;<option value="NO">NO</option>
-                                    <option value="YES">YES</option> &nbsp;
+                                    <option value="YES">YES</option>&nbsp; &nbsp;
                                 </select></td>
                             <td style="width: 7.2343%; border: 2px solid rgb(0, 0, 0); padding:0;"><select class="cell-select">&nbsp;<option value="NO">NO</option>
-                                    <option value="YES">YES</option> &nbsp;
+                                    <option value="YES">YES</option>&nbsp; &nbsp;
                                 </select></td>
                             <td style="width: 7.0821%; border: 2px solid rgb(0, 0, 0); padding:0;"><select class="cell-select">&nbsp;<option value="NO">NO</option>
-                                    <option value="YES">YES</option> &nbsp;
+                                    <option value="YES">YES</option>&nbsp; &nbsp;
                                 </select></td>
                             <td style="width: 7.5301%; border: 2px solid rgb(0, 0, 0); padding:0;"><select class="cell-select">&nbsp;<option value="NO">NO</option>
-                                    <option value="YES">YES</option> &nbsp;
+                                    <option value="YES">YES</option>&nbsp; &nbsp;
                                 </select></td>
                             <td style="width: 7.6537%; border: 2px solid rgb(0, 0, 0); padding:0;"><select class="cell-select">&nbsp;<option value="NO">NO</option>
-                                    <option value="YES">YES</option> &nbsp;
+                                    <option value="YES">YES</option>&nbsp; &nbsp;
                                 </select></td>
                             <td style="border: 2px solid rgb(0, 0, 0); width: 7.3999%; padding:0;"><select class="cell-select">&nbsp;<option value="NO">NO</option>
-                                    <option value="YES">YES</option> &nbsp;
+                                    <option value="YES">YES</option>&nbsp; &nbsp;
                                 </select></td>
                             <td style="border: 2px solid rgb(0, 0, 0); width: 27.9665%; padding:0;"><input type="text" class="cell-input" style="height:100%;"></td>
                         </tr>
@@ -571,22 +741,22 @@
                             <td style="border: 2px solid rgb(0, 0, 0);"><span style="font-size: 11px;">13</span></td>
                             <td class="text-left" style="border: 2px solid rgb(0, 0, 0); width: 24.7352%;"><span style="font-size: 11px;">Switchgear HV Test</span></td>
                             <td style="border: 2px solid rgb(0, 0, 0); width: 7.203%; padding:0;"><select class="cell-select">&nbsp;<option value="NO">NO</option>
-                                    <option value="YES">YES</option> &nbsp;
+                                    <option value="YES">YES</option>&nbsp; &nbsp;
                                 </select></td>
                             <td style="width: 7.2343%; border: 2px solid rgb(0, 0, 0); padding:0;"><select class="cell-select">&nbsp;<option value="NO">NO</option>
-                                    <option value="YES">YES</option> &nbsp;
+                                    <option value="YES">YES</option>&nbsp; &nbsp;
                                 </select></td>
                             <td style="width: 7.0821%; border: 2px solid rgb(0, 0, 0); padding:0;"><select class="cell-select">&nbsp;<option value="NO">NO</option>
-                                    <option value="YES">YES</option> &nbsp;
+                                    <option value="YES">YES</option>&nbsp; &nbsp;
                                 </select></td>
                             <td style="width: 7.5301%; border: 2px solid rgb(0, 0, 0); padding:0;"><select class="cell-select">&nbsp;<option value="NO">NO</option>
-                                    <option value="YES">YES</option> &nbsp;
+                                    <option value="YES">YES</option>&nbsp; &nbsp;
                                 </select></td>
                             <td style="width: 7.6537%; border: 2px solid rgb(0, 0, 0); padding:0;"><select class="cell-select">&nbsp;<option value="NO">NO</option>
-                                    <option value="YES">YES</option> &nbsp;
+                                    <option value="YES">YES</option>&nbsp; &nbsp;
                                 </select></td>
                             <td style="border: 2px solid rgb(0, 0, 0); width: 7.3999%; padding:0;"><select class="cell-select">&nbsp;<option value="NO">NO</option>
-                                    <option value="YES">YES</option> &nbsp;
+                                    <option value="YES">YES</option>&nbsp; &nbsp;
                                 </select></td>
                             <td style="border: 2px solid rgb(0, 0, 0); width: 27.9665%; padding:0;"><input type="text" class="cell-input" style="height:100%;"></td>
                         </tr>
@@ -594,22 +764,22 @@
                             <td style="border: 2px solid rgb(0, 0, 0);"><span style="font-size: 11px;">14</span></td>
                             <td class="text-left" style="border: 2px solid rgb(0, 0, 0); width: 24.7352%;"><span style="font-size: 11px;">Switchgear PD Test<sup><span style="color: rgb(255, 0, 0);">2)</span></sup></span></td>
                             <td style="border: 2px solid rgb(0, 0, 0); width: 7.203%; padding:0;"><select class="cell-select">&nbsp;<option value="NO">NO</option>
-                                    <option value="YES">YES</option> &nbsp;
+                                    <option value="YES">YES</option>&nbsp; &nbsp;
                                 </select></td>
                             <td style="width: 7.2343%; border: 2px solid rgb(0, 0, 0); padding:0;"><select class="cell-select">&nbsp;<option value="NO">NO</option>
-                                    <option value="YES">YES</option> &nbsp;
+                                    <option value="YES">YES</option>&nbsp; &nbsp;
                                 </select></td>
                             <td style="width: 7.0821%; border: 2px solid rgb(0, 0, 0); padding:0;"><select class="cell-select">&nbsp;<option value="NO">NO</option>
-                                    <option value="YES">YES</option> &nbsp;
+                                    <option value="YES">YES</option>&nbsp; &nbsp;
                                 </select></td>
                             <td style="width: 7.5301%; border: 2px solid rgb(0, 0, 0); padding:0;"><select class="cell-select">&nbsp;<option value="NO">NO</option>
-                                    <option value="YES">YES</option> &nbsp;
+                                    <option value="YES">YES</option>&nbsp; &nbsp;
                                 </select></td>
                             <td style="width: 7.6537%; border: 2px solid rgb(0, 0, 0); padding:0;"><select class="cell-select">&nbsp;<option value="NO">NO</option>
-                                    <option value="YES">YES</option> &nbsp;
+                                    <option value="YES">YES</option>&nbsp; &nbsp;
                                 </select></td>
                             <td style="border: 2px solid rgb(0, 0, 0); width: 7.3999%; padding:0;"><select class="cell-select">&nbsp;<option value="NO">NO</option>
-                                    <option value="YES">YES</option> &nbsp;
+                                    <option value="YES">YES</option>&nbsp; &nbsp;
                                 </select></td>
                             <td style="border: 2px solid rgb(0, 0, 0); width: 27.9665%; padding:0;"><input type="text" class="cell-input" style="height:100%;"></td>
                         </tr>
@@ -617,22 +787,22 @@
                             <td style="border: 2px solid rgb(0, 0, 0);"><span style="font-size: 11px;">15</span></td>
                             <td class="text-left" style="border: 2px solid rgb(0, 0, 0); width: 24.7352%;"><span style="font-size: 11px;">Scheme Check</span></td>
                             <td style="border: 2px solid rgb(0, 0, 0); width: 7.203%; padding:0;"><select class="cell-select">&nbsp;<option value="NO">NO</option>
-                                    <option value="YES">YES</option> &nbsp;
+                                    <option value="YES">YES</option>&nbsp; &nbsp;
                                 </select></td>
                             <td style="width: 7.2343%; border: 2px solid rgb(0, 0, 0); padding:0;"><select class="cell-select">&nbsp;<option value="NO">NO</option>
-                                    <option value="YES">YES</option> &nbsp;
+                                    <option value="YES">YES</option>&nbsp; &nbsp;
                                 </select></td>
                             <td style="width: 7.0821%; border: 2px solid rgb(0, 0, 0); padding:0;"><select class="cell-select">&nbsp;<option value="NO">NO</option>
-                                    <option value="YES">YES</option> &nbsp;
+                                    <option value="YES">YES</option>&nbsp; &nbsp;
                                 </select></td>
                             <td style="width: 7.5301%; border: 2px solid rgb(0, 0, 0); padding:0;"><select class="cell-select">&nbsp;<option value="NO">NO</option>
-                                    <option value="YES">YES</option> &nbsp;
+                                    <option value="YES">YES</option>&nbsp; &nbsp;
                                 </select></td>
                             <td style="width: 7.6537%; border: 2px solid rgb(0, 0, 0); padding:0;"><select class="cell-select">&nbsp;<option value="NO">NO</option>
-                                    <option value="YES">YES</option> &nbsp;
+                                    <option value="YES">YES</option>&nbsp; &nbsp;
                                 </select></td>
                             <td style="border: 2px solid rgb(0, 0, 0); width: 7.3999%; padding:0;"><select class="cell-select">&nbsp;<option value="NO">NO</option>
-                                    <option value="YES">YES</option> &nbsp;
+                                    <option value="YES">YES</option>&nbsp; &nbsp;
                                 </select></td>
                             <td style="border: 2px solid rgb(0, 0, 0); width: 27.9665%; padding:0;"><input type="text" class="cell-input" style="height:100%;"></td>
                         </tr>
@@ -640,22 +810,22 @@
                             <td style="border: 2px solid rgb(0, 0, 0);"><span style="font-size: 11px;">16</span></td>
                             <td class="text-left" style="border: 2px solid rgb(0, 0, 0); width: 24.7352%;"><span style="font-size: 11px;">CT Primary&amp;Secondary Injection</span></td>
                             <td style="border: 2px solid rgb(0, 0, 0); width: 7.203%; padding:0;"><select class="cell-select">&nbsp;<option value="NO">NO</option>
-                                    <option value="YES">YES</option> &nbsp;
+                                    <option value="YES">YES</option>&nbsp; &nbsp;
                                 </select></td>
                             <td style="width: 7.2343%; border: 2px solid rgb(0, 0, 0); padding:0;"><select class="cell-select">&nbsp;<option value="NO">NO</option>
-                                    <option value="YES">YES</option> &nbsp;
+                                    <option value="YES">YES</option>&nbsp; &nbsp;
                                 </select></td>
                             <td style="width: 7.0821%; border: 2px solid rgb(0, 0, 0); padding:0;"><select class="cell-select">&nbsp;<option value="NO">NO</option>
-                                    <option value="YES">YES</option> &nbsp;
+                                    <option value="YES">YES</option>&nbsp; &nbsp;
                                 </select></td>
                             <td style="width: 7.5301%; border: 2px solid rgb(0, 0, 0); padding:0;"><select class="cell-select">&nbsp;<option value="NO">NO</option>
-                                    <option value="YES">YES</option> &nbsp;
+                                    <option value="YES">YES</option>&nbsp; &nbsp;
                                 </select></td>
                             <td style="width: 7.6537%; border: 2px solid rgb(0, 0, 0); padding:0;"><select class="cell-select">&nbsp;<option value="NO">NO</option>
-                                    <option value="YES">YES</option> &nbsp;
+                                    <option value="YES">YES</option>&nbsp; &nbsp;
                                 </select></td>
                             <td style="border: 2px solid rgb(0, 0, 0); width: 7.3999%; padding:0;"><select class="cell-select">&nbsp;<option value="NO">NO</option>
-                                    <option value="YES">YES</option> &nbsp;
+                                    <option value="YES">YES</option>&nbsp; &nbsp;
                                 </select></td>
                             <td style="border: 2px solid rgb(0, 0, 0); width: 27.9665%; padding:0;"><input type="text" class="cell-input" style="height:100%;"></td>
                         </tr>
@@ -663,22 +833,22 @@
                             <td style="border: 2px solid rgb(0, 0, 0);"><span style="font-size: 11px;">17</span></td>
                             <td class="text-left" style="border: 2px solid rgb(0, 0, 0); width: 24.7352%;"><span style="font-size: 11px;">VT Secondary Injection</span></td>
                             <td style="border: 2px solid rgb(0, 0, 0); width: 7.203%; padding:0;"><select class="cell-select">&nbsp;<option value="NO">NO</option>
-                                    <option value="YES">YES</option> &nbsp;
+                                    <option value="YES">YES</option>&nbsp; &nbsp;
                                 </select></td>
                             <td style="width: 7.2343%; border: 2px solid rgb(0, 0, 0); padding:0;"><select class="cell-select">&nbsp;<option value="NO">NO</option>
-                                    <option value="YES">YES</option> &nbsp;
+                                    <option value="YES">YES</option>&nbsp; &nbsp;
                                 </select></td>
                             <td style="width: 7.0821%; border: 2px solid rgb(0, 0, 0); padding:0;"><select class="cell-select">&nbsp;<option value="NO">NO</option>
-                                    <option value="YES">YES</option> &nbsp;
+                                    <option value="YES">YES</option>&nbsp; &nbsp;
                                 </select></td>
                             <td style="width: 7.5301%; border: 2px solid rgb(0, 0, 0); padding:0;"><select class="cell-select">&nbsp;<option value="NO">NO</option>
-                                    <option value="YES">YES</option> &nbsp;
+                                    <option value="YES">YES</option>&nbsp; &nbsp;
                                 </select></td>
                             <td style="width: 7.6537%; border: 2px solid rgb(0, 0, 0); padding:0;"><select class="cell-select">&nbsp;<option value="NO">NO</option>
-                                    <option value="YES">YES</option> &nbsp;
+                                    <option value="YES">YES</option>&nbsp; &nbsp;
                                 </select></td>
                             <td style="border: 2px solid rgb(0, 0, 0); width: 7.3999%; padding:0;"><select class="cell-select">&nbsp;<option value="NO">NO</option>
-                                    <option value="YES">YES</option> &nbsp;
+                                    <option value="YES">YES</option>&nbsp; &nbsp;
                                 </select></td>
                             <td style="border: 2px solid rgb(0, 0, 0); width: 27.9665%; padding:0;"><input type="text" class="cell-input" style="height:100%;"></td>
                         </tr>
@@ -686,22 +856,22 @@
                             <td style="border: 2px solid rgb(0, 0, 0);"><span style="font-size: 11px;">18</span></td>
                             <td class="text-left" style="border: 2px solid rgb(0, 0, 0); width: 24.7352%;"><span style="font-size: 11px;">Simple Protection Relays</span></td>
                             <td style="border: 2px solid rgb(0, 0, 0); width: 7.203%; padding:0;"><select class="cell-select">&nbsp;<option value="NO">NO</option>
-                                    <option value="YES">YES</option> &nbsp;
+                                    <option value="YES">YES</option>&nbsp; &nbsp;
                                 </select></td>
                             <td style="width: 7.2343%; border: 2px solid rgb(0, 0, 0); padding:0;"><select class="cell-select">&nbsp;<option value="NO">NO</option>
-                                    <option value="YES">YES</option> &nbsp;
+                                    <option value="YES">YES</option>&nbsp; &nbsp;
                                 </select></td>
                             <td style="width: 7.0821%; border: 2px solid rgb(0, 0, 0); padding:0;"><select class="cell-select">&nbsp;<option value="NO">NO</option>
-                                    <option value="YES">YES</option> &nbsp;
+                                    <option value="YES">YES</option>&nbsp; &nbsp;
                                 </select></td>
                             <td style="width: 7.5301%; border: 2px solid rgb(0, 0, 0); padding:0;"><select class="cell-select">&nbsp;<option value="NO">NO</option>
-                                    <option value="YES">YES</option> &nbsp;
+                                    <option value="YES">YES</option>&nbsp; &nbsp;
                                 </select></td>
                             <td style="width: 7.6537%; border: 2px solid rgb(0, 0, 0); padding:0;"><select class="cell-select">&nbsp;<option value="NO">NO</option>
-                                    <option value="YES">YES</option> &nbsp;
+                                    <option value="YES">YES</option>&nbsp; &nbsp;
                                 </select></td>
                             <td style="border: 2px solid rgb(0, 0, 0); width: 7.3999%; padding:0;"><select class="cell-select">&nbsp;<option value="NO">NO</option>
-                                    <option value="YES">YES</option> &nbsp;
+                                    <option value="YES">YES</option>&nbsp; &nbsp;
                                 </select></td>
                             <td style="border: 2px solid rgb(0, 0, 0); width: 27.9665%; padding:0;"><input type="text" class="cell-input" style="height:100%;"></td>
                         </tr>
@@ -709,22 +879,22 @@
                             <td style="border: 2px solid rgb(0, 0, 0);"><span style="font-size: 11px;">19</span></td>
                             <td class="text-left" style="border: 2px solid rgb(0, 0, 0); width: 24.7352%;"><span style="font-size: 11px;">Advanced Protection&amp;Control IEDs</span></td>
                             <td style="border: 2px solid rgb(0, 0, 0); width: 7.203%; padding:0;"><select class="cell-select">&nbsp;<option value="NO">NO</option>
-                                    <option value="YES">YES</option> &nbsp;
+                                    <option value="YES">YES</option>&nbsp; &nbsp;
                                 </select></td>
                             <td style="width: 7.2343%; border: 2px solid rgb(0, 0, 0); padding:0;"><select class="cell-select">&nbsp;<option value="NO">NO</option>
-                                    <option value="YES">YES</option> &nbsp;
+                                    <option value="YES">YES</option>&nbsp; &nbsp;
                                 </select></td>
                             <td style="width: 7.0821%; border: 2px solid rgb(0, 0, 0); padding:0;"><select class="cell-select">&nbsp;<option value="NO">NO</option>
-                                    <option value="YES">YES</option> &nbsp;
+                                    <option value="YES">YES</option>&nbsp; &nbsp;
                                 </select></td>
                             <td style="width: 7.5301%; border: 2px solid rgb(0, 0, 0); padding:0;"><select class="cell-select">&nbsp;<option value="NO">NO</option>
-                                    <option value="YES">YES</option> &nbsp;
+                                    <option value="YES">YES</option>&nbsp; &nbsp;
                                 </select></td>
                             <td style="width: 7.6537%; border: 2px solid rgb(0, 0, 0); padding:0;"><select class="cell-select">&nbsp;<option value="NO">NO</option>
-                                    <option value="YES">YES</option> &nbsp;
+                                    <option value="YES">YES</option>&nbsp; &nbsp;
                                 </select></td>
                             <td style="border: 2px solid rgb(0, 0, 0); width: 7.3999%; padding:0;"><select class="cell-select">&nbsp;<option value="NO">NO</option>
-                                    <option value="YES">YES</option> &nbsp;
+                                    <option value="YES">YES</option>&nbsp; &nbsp;
                                 </select></td>
                             <td style="border: 2px solid rgb(0, 0, 0); width: 27.9665%; padding:0;"><input type="text" class="cell-input" style="height:100%;"></td>
                         </tr>
@@ -732,22 +902,22 @@
                             <td style="border: 2px solid rgb(0, 0, 0);"><span style="font-size: 11px;">20</span></td>
                             <td class="text-left" style="border: 2px solid rgb(0, 0, 0); width: 24.7352%;"><span style="font-size: 11px;">Stability Test</span></td>
                             <td style="border: 2px solid rgb(0, 0, 0); width: 7.203%; padding:0;"><select class="cell-select">&nbsp;<option value="NO">NO</option>
-                                    <option value="YES">YES</option> &nbsp;
+                                    <option value="YES">YES</option>&nbsp; &nbsp;
                                 </select></td>
                             <td style="width: 7.2343%; border: 2px solid rgb(0, 0, 0); padding:0;"><select class="cell-select">&nbsp;<option value="NO">NO</option>
-                                    <option value="YES">YES</option> &nbsp;
+                                    <option value="YES">YES</option>&nbsp; &nbsp;
                                 </select></td>
                             <td style="width: 7.0821%; border: 2px solid rgb(0, 0, 0); padding:0;"><select class="cell-select">&nbsp;<option value="NO">NO</option>
-                                    <option value="YES">YES</option> &nbsp;
+                                    <option value="YES">YES</option>&nbsp; &nbsp;
                                 </select></td>
                             <td style="width: 7.5301%; border: 2px solid rgb(0, 0, 0); padding:0;"><select class="cell-select">&nbsp;<option value="NO">NO</option>
-                                    <option value="YES">YES</option> &nbsp;
+                                    <option value="YES">YES</option>&nbsp; &nbsp;
                                 </select></td>
                             <td style="width: 7.6537%; border: 2px solid rgb(0, 0, 0); padding:0;"><select class="cell-select">&nbsp;<option value="NO">NO</option>
-                                    <option value="YES">YES</option> &nbsp;
+                                    <option value="YES">YES</option>&nbsp; &nbsp;
                                 </select></td>
                             <td style="border: 2px solid rgb(0, 0, 0); width: 7.3999%; padding:0;"><select class="cell-select">&nbsp;<option value="NO">NO</option>
-                                    <option value="YES">YES</option> &nbsp;
+                                    <option value="YES">YES</option>&nbsp; &nbsp;
                                 </select></td>
                             <td style="border: 2px solid rgb(0, 0, 0); width: 27.9665%; padding:0;"><input type="text" class="cell-input" style="height:100%;"></td>
                         </tr>
@@ -756,17 +926,17 @@
                             <td class="text-left" style="border: 2px solid rgb(0, 0, 0); width: 24.7352%;"><span style="font-size: 11px;">End To End Test</span></td>
                             <td style="width: 7.203%; background-color: rgb(0, 0, 0); border: 2px solid rgb(0, 0, 0);"><br></td>
                             <td style="width: 7.2343%; border: 2px solid rgb(0, 0, 0); padding:0;"><select class="cell-select">&nbsp;<option value="NO">NO</option>
-                                    <option value="YES">YES</option> &nbsp;
+                                    <option value="YES">YES</option>&nbsp; &nbsp;
                                 </select></td>
                             <td style="width: 7.0821%; border: 2px solid rgb(0, 0, 0); padding:0;"><select class="cell-select">&nbsp;<option value="NO">NO</option>
-                                    <option value="YES">YES</option> &nbsp;
+                                    <option value="YES">YES</option>&nbsp; &nbsp;
                                 </select></td>
                             <td style="width: 7.5301%; background-color: rgb(0, 0, 0); border: 2px solid rgb(0, 0, 0);"><br></td>
                             <td style="width: 7.6537%; border: 2px solid rgb(0, 0, 0); padding:0;"><select class="cell-select">&nbsp;<option value="NO">NO</option>
-                                    <option value="YES">YES</option> &nbsp;
+                                    <option value="YES">YES</option>&nbsp; &nbsp;
                                 </select></td>
                             <td style="border: 2px solid rgb(0, 0, 0); width: 7.3999%; padding:0;"><select class="cell-select">&nbsp;<option value="NO">NO</option>
-                                    <option value="YES">YES</option> &nbsp;
+                                    <option value="YES">YES</option>&nbsp; &nbsp;
                                 </select></td>
                             <td style="border: 2px solid rgb(0, 0, 0); width: 27.9665%; padding:0;"><input type="text" class="cell-input" style="height:100%;"></td>
                         </tr>
@@ -774,22 +944,22 @@
                             <td style="border: 2px solid rgb(0, 0, 0);"><span style="font-size: 11px;">22</span></td>
                             <td class="text-left" style="border: 2px solid rgb(0, 0, 0); width: 24.7352%;"><span style="font-size: 11px;">Final Trip Test</span></td>
                             <td style="border: 2px solid rgb(0, 0, 0); width: 7.203%; padding:0;"><select class="cell-select">&nbsp;<option value="NO">NO</option>
-                                    <option value="YES">YES</option> &nbsp;
+                                    <option value="YES">YES</option>&nbsp; &nbsp;
                                 </select></td>
                             <td style="width: 7.2343%; border: 2px solid rgb(0, 0, 0); padding:0;"><select class="cell-select">&nbsp;<option value="NO">NO</option>
-                                    <option value="YES">YES</option> &nbsp;
+                                    <option value="YES">YES</option>&nbsp; &nbsp;
                                 </select></td>
                             <td style="width: 7.0821%; border: 2px solid rgb(0, 0, 0); padding:0;"><select class="cell-select">&nbsp;<option value="NO">NO</option>
-                                    <option value="YES">YES</option> &nbsp;
+                                    <option value="YES">YES</option>&nbsp; &nbsp;
                                 </select></td>
                             <td style="width: 7.5301%; border: 2px solid rgb(0, 0, 0); padding:0;"><select class="cell-select">&nbsp;<option value="NO">NO</option>
-                                    <option value="YES">YES</option> &nbsp;
+                                    <option value="YES">YES</option>&nbsp; &nbsp;
                                 </select></td>
                             <td style="width: 7.6537%; border: 2px solid rgb(0, 0, 0); padding:0;"><select class="cell-select">&nbsp;<option value="NO">NO</option>
-                                    <option value="YES">YES</option> &nbsp;
+                                    <option value="YES">YES</option>&nbsp; &nbsp;
                                 </select></td>
                             <td style="border: 2px solid rgb(0, 0, 0); width: 7.3999%; padding:0;"><select class="cell-select">&nbsp;<option value="NO">NO</option>
-                                    <option value="YES">YES</option> &nbsp;
+                                    <option value="YES">YES</option>&nbsp; &nbsp;
                                 </select></td>
                             <td style="border: 2px solid rgb(0, 0, 0); width: 27.9665%; padding:0;"><input type="text" class="cell-input" style="height:100%;"></td>
                         </tr>
@@ -797,10 +967,10 @@
                             <td style="border: 2px solid rgb(0, 0, 0);"><span style="font-size: 11px;">23</span></td>
                             <td class="text-left" style="border: 2px solid rgb(0, 0, 0); width: 24.7352%;"><span style="font-size: 11px;">Live Substations<strong><span style="color: rgb(255, 0, 0);"><sup>3)</sup></span></strong></span></td>
                             <td colspan="3" style="width: 21.4685%; border: 2px solid rgb(0, 0, 0); padding:0; text-align:center;"><select style="width:auto;border:none;outline:none;margin:0 auto;display:block;font-size:11px;font-family:Arial,Helvetica,sans-serif;cursor:pointer;text-align:center;">&nbsp;<option value="NO">NO</option>
-                                    <option value="YES">YES</option> &nbsp;
+                                    <option value="YES">YES</option>&nbsp; &nbsp;
                                 </select></td>
                             <td colspan="3" style="width: 22.5129%; border: 2px solid rgb(0, 0, 0); padding:0; text-align:center;"><select style="width:auto;border:none;outline:none;margin:0 auto;display:block;font-size:11px;font-family:Arial,Helvetica,sans-serif;cursor:pointer;text-align:center;">&nbsp;<option value="NO">NO</option>
-                                    <option value="YES">YES</option> &nbsp;
+                                    <option value="YES">YES</option>&nbsp; &nbsp;
                                 </select></td>
                             <td style="border: 2px solid rgb(0, 0, 0); width: 27.9665%; padding:0;"><input type="text" class="cell-input" style="height:100%;"></td>
                         </tr>
@@ -809,17 +979,17 @@
                             <td class="text-left" style="border: 2px solid rgb(0, 0, 0); width: 24.7352%;"><span style="font-size: 11px;">Site Coordinator<sup><span style="color: rgb(255, 0, 0);">4)</span></sup></span></td>
                             <td style="width: 7.203%; background-color: rgb(0, 0, 0); border: 2px solid rgb(0, 0, 0);"><br></td>
                             <td style="width: 7.2343%; border: 2px solid rgb(0, 0, 0); padding:0;"><select class="cell-select">&nbsp;<option value="NO">NO</option>
-                                    <option value="YES">YES</option> &nbsp;
+                                    <option value="YES">YES</option>&nbsp; &nbsp;
                                 </select></td>
                             <td style="width: 7.0821%; border: 2px solid rgb(0, 0, 0); padding:0;"><select class="cell-select">&nbsp;<option value="NO">NO</option>
-                                    <option value="YES">YES</option> &nbsp;
+                                    <option value="YES">YES</option>&nbsp; &nbsp;
                                 </select></td>
                             <td style="width: 7.5301%; background-color: rgb(0, 0, 0); border: 2px solid rgb(0, 0, 0);"><br></td>
                             <td style="width: 7.6537%; border: 2px solid rgb(0, 0, 0); padding:0;"><select class="cell-select">&nbsp;<option value="NO">NO</option>
-                                    <option value="YES">YES</option> &nbsp;
+                                    <option value="YES">YES</option>&nbsp; &nbsp;
                                 </select></td>
                             <td style="border: 2px solid rgb(0, 0, 0); width: 7.3999%; padding:0;"><select class="cell-select">&nbsp;<option value="NO">NO</option>
-                                    <option value="YES">YES</option> &nbsp;
+                                    <option value="YES">YES</option>&nbsp; &nbsp;
                                 </select></td>
                             <td style="border: 2px solid rgb(0, 0, 0); width: 27.9665%; padding:0;"><input type="text" class="cell-input" style="height:100%;"></td>
                         </tr>
@@ -832,7 +1002,7 @@
                 </table>
             </div>
             <div class="remarks-section">
-                <div class="remarks-notes" style="text-align: left; font-size: 10px; font-family: Arial, Helvetica, sans-serif; font-weight: normal; line-height: 1.4; padding: 1px 2px;"><span style="color: rgb(255, 0, 0);">1)</span> T&amp;C Contractor Engineer shall be certified by <strong>the Power Cable PD measuring unit manufacturer.</strong><br><span style="color: rgb(255, 0, 0);">2)</span> T&amp;C Contractor Engineer shall be certified by <strong>the Switchgear PD measuring unit manufacturer.</strong><br><span style="color: rgb(255, 0, 0);">3)</span> Full knowledge of <strong>the procedure (PR-NG-6460-008 Commissioning in Live Substation Projects)</strong> and no less than <strong>(1) year</strong> experience in KSA.<br><span style="color: rgb(255, 0, 0);">4)</span> Full knowledge of <strong>all CSD procedures</strong> and must be approved in the activities above <strong>No.3, 4, 15, 16, 17, 18, 19, 20, 21 and 22</strong> for the same voltage level.</div>
+                <div class="remarks-notes" style="text-align: left; font-size: 10px; font-family: Arial, Helvetica, sans-serif; font-weight: normal; line-height: 1.4; padding: 1px 2px;"><span style="color: rgb(255, 0, 0);">1)</span> T&amp;C Contractor Engineer shall be certified by <strong>the Power Cable PD measuring unit manufacturer.</strong><br><span style="color: rgb(255, 0, 0);">2)</span> T&amp;C Contractor Engineer shall be certified by <strong>the Switchgear PD measuring unit manufacturer.</strong><br><span style="color: rgb(255, 0, 0);">3)</span> Full knowledge of <strong>the procedure (PR-NG-6460-008 Commissioning in Live Substation Projects)</strong> and no less than&nbsp;<strong>(1) year</strong> experience in KSA.<br><span style="color: rgb(255, 0, 0);">4)</span> Full knowledge of <strong>all CSD procedures</strong> and must be approved in the activities above <strong>No.3, 4, 15, 16, 17, 18, 19, 20, 21 and 22</strong> for the same voltage level.</div>
             </div>
             <div class="remarks-section">
                 <div class="remarks-title"><span style="font-size: 11px;"><strong><u>Note: Final approval is subjected to the performance at the site.</u></strong></span></div>
@@ -847,9 +1017,11 @@
                         <tr>
                             <td style="width: 4.7946%; text-align: center; border: 1px solid rgb(0, 0, 0); background-color: rgb(255, 255, 255); height: 20px;"><span style="font-size: 11px;">1</span></td>
                             <td style="width: 56.8304%; border: 1px solid rgb(0, 0, 0); background-color: rgb(255, 255, 255); height: 20px; padding:0;" colspan="2"><input type="text" class="cell-input" style="font-size:11px;"></td>
-                            <td style="width: 17.4553%; border: 1px solid rgb(0, 0, 0); background-color: rgb(255, 255, 255); height: 20px; text-align: center; padding:2px;"><div class="date-cell"><input type="text" class="date-display" readonly placeholder=""><button type="button" class="date-cal-btn no-print" onclick="this.parentNode.querySelector('.date-hidden-picker').showPicker()">📅</button><input type="date" class="date-hidden-picker" onchange="formatDateField(this)"></div></td>
+                            <td style="width: 17.4553%; border: 1px solid rgb(0, 0, 0); background-color: rgb(255, 255, 255); height: 20px; text-align: center; padding:2px;">
+                                <div class="date-cell"><input type="text" class="date-display" readonly="" placeholder=""><button type="button" class="date-cal-btn no-print" onclick="this.parentNode.querySelector('.date-hidden-picker').showPicker()">📅</button><input type="date" class="date-hidden-picker" onchange="formatDateField(this)"></div>
+                            </td>
                             <td style="width: 22.1249%; border: 1px solid rgb(0, 0, 0); background-color: rgb(255, 255, 255); height: 38px; text-align: center; padding:0; vertical-align:middle;">
-                                <div style="position:relative;width:100%;height:38px;overflow:hidden;"><img id="sig-img-ex1" src="" alt="" style="position:absolute;top:0;left:0;width:100%;height:100%;object-fit:contain;">
+                                <div style="position:relative;width:100%;height:38px;overflow:hidden;"><img id="sig-img-ex1" src="" alt="" style="margin: 0 auto 0 0; display: block; top: 0px; left: 0px; width: 100%; height: 100%; object-fit: contain;">
                                     <div id="sig-btns-ex1" class="no-print" style="position:absolute;top:2px;right:2px;z-index:2;display:flex;gap:3px;"><label for="sig-input-ex1" title="Upload signature" style="cursor:pointer;background:rgba(255,255,255,0.85);border:1px solid #999;border-radius:3px;padding:2px 4px;font-size:13px;line-height:1;">🖉</label> <button onclick="clearSig('ex1')" title="Delete signature" style="background:rgba(255,255,255,0.85);border:1px solid #999;border-radius:3px;padding:2px 4px;font-size:13px;line-height:1;cursor:pointer;">🗑</button></div><input type="file" id="sig-input-ex1" accept="image/*" style="display:none;" onchange="loadSig(this,'ex1')">
                                 </div>
                             </td>
@@ -857,9 +1029,11 @@
                         <tr>
                             <td style="width: 4.7946%; text-align: center; border: 1px solid rgb(0, 0, 0); background-color: rgb(255, 255, 255); height: 20px;"><span style="font-size: 11px;">2</span></td>
                             <td style="width: 56.8304%; border: 1px solid rgb(0, 0, 0); background-color: rgb(255, 255, 255); height: 20px; padding:0;" colspan="2"><input type="text" class="cell-input" style="font-size:11px;"></td>
-                            <td style="width: 17.4553%; border: 1px solid rgb(0, 0, 0); height: 20px; text-align: center; padding:2px;"><div class="date-cell"><input type="text" class="date-display" readonly placeholder=""><button type="button" class="date-cal-btn no-print" onclick="this.parentNode.querySelector('.date-hidden-picker').showPicker()">📅</button><input type="date" class="date-hidden-picker" onchange="formatDateField(this)"></div></td>
+                            <td style="width: 17.4553%; border: 1px solid rgb(0, 0, 0); height: 20px; text-align: center; padding:2px;">
+                                <div class="date-cell"><input type="text" class="date-display" readonly="" placeholder=""><button type="button" class="date-cal-btn no-print" onclick="this.parentNode.querySelector('.date-hidden-picker').showPicker()">📅</button><input type="date" class="date-hidden-picker" onchange="formatDateField(this)"></div>
+                            </td>
                             <td style="width: 22.1249%; border: 1px solid rgb(0, 0, 0); height: 38px; text-align: center; padding:0; vertical-align:middle;">
-                                <div style="position:relative;width:100%;height:38px;overflow:hidden;"><img id="sig-img-ex2" src="" alt="" style="position:absolute;top:0;left:0;width:100%;height:100%;object-fit:contain;">
+                                <div style="position:relative;width:100%;height:38px;overflow:hidden;"><img id="sig-img-ex2" src="" alt="" style="margin: 0 auto 0 0; display: block; top: 0px; left: 0px; width: 100%; height: 100%; object-fit: contain;">
                                     <div id="sig-btns-ex2" class="no-print" style="position:absolute;top:2px;right:2px;z-index:2;display:flex;gap:3px;"><label for="sig-input-ex2" title="Upload signature" style="cursor:pointer;background:rgba(255,255,255,0.85);border:1px solid #999;border-radius:3px;padding:2px 4px;font-size:13px;line-height:1;">🖉</label> <button onclick="clearSig('ex2')" title="Delete signature" style="background:rgba(255,255,255,0.85);border:1px solid #999;border-radius:3px;padding:2px 4px;font-size:13px;line-height:1;cursor:pointer;">🗑</button></div><input type="file" id="sig-input-ex2" accept="image/*" style="display:none;" onchange="loadSig(this,'ex2')">
                                 </div>
                             </td>
@@ -867,9 +1041,11 @@
                         <tr>
                             <td style="width: 29.3955%; border: 1px solid rgb(0, 0, 0); background-color: rgb(255, 255, 255); padding: 5px;" colspan="2"><span style="font-size: 11px;"><strong>Divisional Qualification Coordinator:</strong></span></td>
                             <td style="width: 32.0881%; border: 1px solid rgb(0, 0, 0); background-color: rgb(255, 255, 255); padding:0;"><input type="text" class="cell-input" style="font-size:11px;"></td>
-                            <td style="width: 17.4553%; border: 1px solid rgb(0, 0, 0); background-color: rgb(255, 255, 255); padding:2px; text-align: center;"><div class="date-cell"><input type="text" class="date-display" readonly placeholder=""><button type="button" class="date-cal-btn no-print" onclick="this.parentNode.querySelector('.date-hidden-picker').showPicker()">📅</button><input type="date" class="date-hidden-picker" onchange="formatDateField(this)"></div></td>
+                            <td style="width: 17.4553%; border: 1px solid rgb(0, 0, 0); background-color: rgb(255, 255, 255); padding:2px; text-align: center;">
+                                <div class="date-cell"><input type="text" class="date-display" readonly="" placeholder=""><button type="button" class="date-cal-btn no-print" onclick="this.parentNode.querySelector('.date-hidden-picker').showPicker()">📅</button><input type="date" class="date-hidden-picker" onchange="formatDateField(this)"></div>
+                            </td>
                             <td style="width: 22.1249%; border: 1px solid rgb(0, 0, 0); background-color: rgb(255, 255, 255); height: 38px; text-align: center; padding:0; vertical-align:middle;">
-                                <div style="position:relative;width:100%;height:38px;overflow:hidden;"><img id="sig-img-dqc" src="" alt="" style="position:absolute;top:0;left:0;width:100%;height:100%;object-fit:contain;">
+                                <div style="position:relative;width:100%;height:38px;overflow:hidden;"><img id="sig-img-dqc" src="" alt="" style="margin: 0 auto 0 0; display: block; top: 0px; left: 0px; width: 100%; height: 100%; object-fit: contain;">
                                     <div id="sig-btns-dqc" class="no-print" style="position:absolute;top:2px;right:2px;z-index:2;display:flex;gap:3px;"><label for="sig-input-dqc" title="Upload signature" style="cursor:pointer;background:rgba(255,255,255,0.85);border:1px solid #999;border-radius:3px;padding:2px 4px;font-size:13px;line-height:1;">🖉</label> <button onclick="clearSig('dqc')" title="Delete signature" style="background:rgba(255,255,255,0.85);border:1px solid #999;border-radius:3px;padding:2px 4px;font-size:13px;line-height:1;cursor:pointer;">🗑</button></div><input type="file" id="sig-input-dqc" accept="image/*" style="display:none;" onchange="loadSig(this,'dqc')">
                                 </div>
                             </td>
@@ -880,6 +1056,7 @@
         </div>
     </div>
     <script>
+        /* ====== Signature helpers ====== */
         function loadSig(input, uid) {
           var file = input.files[0];
           if (!file) return;
@@ -897,8 +1074,8 @@
           img.src = '';
           img.style.display = 'none';
         }
-
-        /* Date formatting: dd-MMM-yyyy */
+        
+        /* ====== Date formatting: dd-MMM-yyyy ====== */
         function formatDateField(picker) {
           var val = picker.value;
           var display = picker.parentNode.querySelector('.date-display');
@@ -910,7 +1087,414 @@
           var d = parts[2];
           display.value = d + '-' + months[m] + '-' + y;
         }
+        
+        /* ====== Upload Modal ====== */
+        function openUploadModal() {
+          document.getElementById('upload-modal').classList.add('active');
+          document.getElementById('pdf-file-input').value = '';
+          document.getElementById('upload-modal-msg').style.display = 'none';
+          document.getElementById('upload-modal-msg').textContent = '';
+        }
+        function closeUploadModal() {
+          document.getElementById('upload-modal').classList.remove('active');
+        }
+        function showModalMsg(msg) {
+          var el = document.getElementById('upload-modal-msg');
+          el.textContent = msg;
+          el.style.display = 'block';
+        }
+        
+        /* ====== PDF Processing ====== */
+        async function processUploadedPDF() {
+          var input = document.getElementById('pdf-file-input');
+          var file = input.files[0];
+          if (!file) { showModalMsg('Please select a PDF file.'); return; }
+          showModalMsg('Processing PDF, please wait...');
+          try {
+            var arrayBuffer = await file.arrayBuffer();
+            if (typeof pdfjsLib === 'undefined') {
+              showModalMsg('PDF library not loaded. Please check your internet connection.');
+              return;
+            }
+            pdfjsLib.GlobalWorkerOptions.workerSrc = 'https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.worker.min.js';
+            var pdf = await pdfjsLib.getDocument({ data: arrayBuffer }).promise;
+            // Only the first page is ever read - any extra pages (e.g. an
+            // unrelated slide accidentally attached after this one) are ignored,
+            // as long as page 1 carries the same fields as the official template.
+            var fieldMap = await buildFieldMap(pdf);
+            if (!fieldMap || Object.keys(fieldMap).length === 0) {
+              showModalMsg('Could not find any recognizable form fields on the first page of this PDF.');
+              return;
+            }
+            extractAndPopulateForm(fieldMap);
+            closeUploadModal();
+          } catch(e) {
+            showModalMsg('Error reading PDF: ' + e.message);
+          }
+        }
+        
+        /* Build a flat {fieldName: value} map for page 1 of the PDF, using two
+           complementary strategies so we work with both kinds of PDFs we may
+           receive:
+           1) Proper AcroForm PDFs (e.g. the original blank template) where
+              fields are registered under the document's /AcroForm catalog -
+              pdf.getFieldObjects() reads these.
+           2) PDFs where widget annotations with values are present directly on
+              the page but there is no top-level /AcroForm entry (this happens
+              with some "print/export a filled copy" PDF outputs) - in that case
+              getFieldObjects() returns nothing, so we fall back to reading the
+              page's own annotations directly. */
+        async function buildFieldMap(pdf) {
+          var map = {};
+        
+          try {
+            var fieldObjects = await pdf.getFieldObjects();
+            if (fieldObjects) {
+              Object.keys(fieldObjects).forEach(function(name) {
+        var arr = fieldObjects[name];
+        if (arr && arr.length && arr[0].value !== undefined) {
+          map[name] = arr[0].value;
+        }
+              });
+            }
+          } catch (e) { /* fall through to page-level scan */ }
+        
+          try {
+            var page = await pdf.getPage(1);
+            var annots = await page.getAnnotations({ intent: 'display' });
+            annots.forEach(function(a) {
+              if (a.fieldName && !(a.fieldName in map)) {
+        map[a.fieldName] = a.fieldValue;
+              }
+            });
+          } catch (e) { /* nothing more we can do */ }
+        
+          return map;
+        }
+        
+        /* ====== State tracking ====== */
+        var uploadModeActive = false;
+        var blankQualSelects = [];
+        
+        /* ====== Field name maps (must match the AcroForm field names in the
+           official Pre-Qualification Approval Form, TP-NG-6450-010-003) ======
+           Engineer profile text fields, in the same DOM order as the
+           <input type="text"> elements inside .doc-info */
+        var PROFILE_FIELD_MAP = [
+          'txtengrname', 'txtcompanyname', 'txtnationality',
+          'txttotalexpyr', 'txttotalexpmo', 'txtidentityno',
+          'txtexpksayr', 'txtexpksamo', 'txtmobileno'
+        ];
+        
+        /* Qualification grid fields, in the same DOM order as the <select>
+           elements inside .qual-table (rows 1-24, T&C Contractor columns
+           first then CSD Approval columns, HV / MV / EHV order, skipping
+           blacked-out cells that have no select at all). */
+        var QUAL_FIELD_MAP = [
+          // 1 Batteries&Chargers
+          'txtbattcharger', 'ctxtbattcharger',
+          // 2 ACDB&DCDB
+          'txtacdbdcdb', 'ctxtacdbdcdb',
+          // 3 Aux./Trip Relays&MCCB
+          'txtauxtriprelaysmccb', 'ctxtauxtriprelaysmccb',
+          // 4 Meters
+          'txtmeters', 'ctxtmeters',
+          // 5 Power Transformer (HV, MV, EHV)
+          'txtxfrmrhv', 'txtxfrmrmv', 'txtxfrmrehv', 'ctxtxfrmrhv', 'ctxtxfrmrmv', 'ctxtxfrmrehv',
+          // 6 Shunt Reactor
+          'txtshunthv', 'txtshuntmv', 'txtshuntehv', 'ctxtshunthv', 'ctxtshuntmv', 'ctxtshuntehv',
+          // 7 Capacitor
+          'txtcaphv', 'txtcapmv', 'txtcapehv', 'ctxtcaphv', 'ctxtcapmv', 'ctxtcapehv',
+          // 8 OHTL
+          'txtohtl', 'ctxtohtl',
+          // 9 Power Cable Electrical Tests
+          'txtcableelechv', 'txtcableelecmv', 'txtcableelecehv', 'ctxtcableelechv', 'ctxtcableelecmv', 'ctxtcableelecehv',
+          // 10 Power Cable HV Test
+          'txtcablehvhv', 'txtcablehvmv', 'txtcablehvehv', 'ctxtcablehvhv', 'ctxtcablehvmv', 'ctxtcablehvehv',
+          // 11 Power Cable PD Test
+          'txtcablepdhv', 'txtcablepdmv', 'txtcablepdehv', 'ctxtcablepdhv', 'ctxtcablepdmv', 'ctxtcablepdehv',
+          // 12 Switchgear Equipment
+          'txtswgrhv', 'txtswgrmv', 'txtswgrehv', 'ctxtswgrhv', 'ctxtswgrmv', 'ctxtswgrehv',
+          // 13 Switchgear HV Test
+          'txtswgrhvhv', 'txtswgrhvmv', 'txtswgrhvehv', 'ctxtswgrhvhv', 'ctxtswgrhvmv', 'ctxtswgrhvehv',
+          // 14 Switchgear PD Test
+          'txtswgrpdhv', 'txtswgrpdmv', 'txtswgrpdehv', 'ctxtswgrpdhv', 'ctxtswgrpdmv', 'ctxtswgrpdehv',
+          // 15 Scheme Check
+          'txtschemehv', 'txtschememv', 'txtschemeehv', 'ctxtschemehv', 'ctxtschememv', 'ctxtschemeehv',
+          // 16 CT Primary&Secondary Injection
+          'txtcthv', 'txtctmv', 'txtctehv', 'ctxtcthv', 'ctxtctmv', 'ctxtctehv',
+          // 17 VT Secondary Injection
+          'txtvtsechv', 'txtvtsecmv', 'txtvtsecehv', 'ctxtvtsechv', 'ctxtvtsecmv', 'ctxtvtsecehv',
+          // 18 Simple Protection Relays
+          'txtsimplerelayshv', 'txtsimplerelaysmv', 'txtsimplerelaysehv', 'ctxtsimplerelayshv', 'ctxtsimplerelaysmv', 'ctxtsimplerelaysehv',
+          // 19 Advanced Protection&Control IEDs
+          'txtadvancedprothv', 'txtadvancedprotmv', 'txtadvancedprotehv', 'ctxtadvancedprothv', 'ctxtadvancedprotmv', 'ctxtadvancedprotehv',
+          // 20 Stability Test
+          'txtstabhv', 'txtstabmv', 'txtstabehv', 'ctxtstabhv', 'ctxtstabmv', 'ctxtstabehv',
+          // 21 End To End Test (no MV - blacked out)
+          'txtendtoendhv', 'txtendtoendehv', 'ctxtendtoendhv', 'ctxtendtoendehv',
+          // 22 Final Trip Test
+          'txtftthv', 'txtfttmv', 'txtfttehv', 'ctxtftthv', 'ctxtfttmv', 'ctxtfttehv',
+          // 23 Live Substations (HV/EHV merged into one cell per side)
+          'txtlivess', 'ctxtlivess',
+          // 24 Site Coordinator (no MV - blacked out)
+          'txtschv', 'txtscehv', 'ctxtschv', 'ctxtscehv'
+        ];
+        
+        function getFieldValue(fieldMap, name) {
+          if (!(name in fieldMap)) return null;
+          var v = fieldMap[name];
+          if (v === undefined || v === null) return null;
+          if (Array.isArray(v)) v = v[0];
+          v = String(v).trim();
+          return v.length ? v : null;
+        }
+        
+        /* ====== Field extraction and form population ====== */
+        function extractAndPopulateForm(fieldMap) {
+          // Reset any previous upload state
+          resetUploadMode();
+        
+          // --- Engineer Profile Fields ---
+          var engineerProfileInputs = getEngineerProfileInputs();
+          for (var p = 0; p < PROFILE_FIELD_MAP.length && p < engineerProfileInputs.length; p++) {
+            var val = getFieldValue(fieldMap, PROFILE_FIELD_MAP[p]);
+            engineerProfileInputs[p].value = val || '';
+          }
+        
+          // --- Qualification Dropdowns ---
+          // Rules, per MV/HV/EHV position:
+          //   - T&C Contractor (txt) field value is "NO" -> BOTH the T&C
+          //     Contractor dropdown and the CSD Approval dropdown at that
+          //     position are flattened to plain "NO" text, regardless of
+          //     section.
+          //   - Otherwise, if the CSD Approval (ctxt) field value is blank ->
+          //     the CSD Approval dropdown is left blank, highlighted red, and
+          //     remains a real, fillable dropdown (CSD section only); the T&C
+          //     Contractor dropdown is flattened to "YES".
+          //   - Otherwise (txt not NO, ctxt not blank) -> each dropdown is
+          //     flattened to its own actual field value from the PDF.
+          var qualSelects = getQualificationSelects();
+          blankQualSelects = [];
+        
+          for (var i = 0; i < qualSelects.length; i++) {
+            var sel = qualSelects[i];
+            var fieldName = QUAL_FIELD_MAP[i];
+            var isCsdField = fieldName && fieldName.indexOf('ctxt') === 0;
+            // Derive both the txt (Contractor) and ctxt (CSD) field names for
+            // this position, regardless of which one this select represents.
+            var txtFieldName = isCsdField ? fieldName.slice(1) : fieldName;
+            var ctxtFieldName = isCsdField ? fieldName : ('c' + fieldName);
+            var txtRawVal = txtFieldName ? getFieldValue(fieldMap, txtFieldName) : null;
+            var ctxtRawVal = ctxtFieldName ? getFieldValue(fieldMap, ctxtFieldName) : null;
+            var txtIsNo = !!(txtRawVal && txtRawVal.toUpperCase() === 'NO');
+            var ctxtIsBlank = !ctxtRawVal;
+        
+            if (txtIsNo) {
+              // Contractor field is "NO" -> flatten both columns to "NO"
+              flattenSelect(sel, 'NO');
+            } else if (ctxtIsBlank) {
+              if (isCsdField) {
+        // CSD Approval dropdown, ctxt blank -> blank in form (user
+        // must fill), highlighted red, remains an actual dropdown
+        if (!sel.querySelector('option[value=""]')) {
+          var blankOpt = document.createElement('option');
+          blankOpt.value = '';
+          blankOpt.text = '';
+          sel.insertBefore(blankOpt, sel.firstChild);
+        }
+        sel.value = '';
+        sel.classList.add('qual-blank-highlight');
+        sel.classList.remove('upload-mode-locked');
+        sel.removeAttribute('disabled');
+        blankQualSelects.push(sel);
+              } else {
+        // T&C Contractor dropdown, ctxt blank -> flatten to "YES"
+        flattenSelect(sel, 'YES');
+              }
+            } else {
+              // Neither NO nor blank -> flatten to this column's own actual
+              // value from the PDF
+              var ownRawVal = isCsdField ? ctxtRawVal : txtRawVal;
+              flattenSelect(sel, ownRawVal || '');
+            }
+          }
+        
+          // --- Lock all other fields except editable ones ---
+          lockNonEditableFields();
+        
+          uploadModeActive = true;
+          alert('PDF data loaded successfully.\n\nFields highlighted in RED must be filled in before printing.\nFill the blank qualification fields, Interviewer names, DQC name, dates, and signatures.');
+        }
+        
+        function getEngineerProfileInputs() {
+          // Get all text inputs in the doc-info table (engineer profile area)
+          // The doc-info table is the first table after the top-header-table
+          var docInfo = document.querySelector('.doc-info');
+          if (!docInfo) return [];
+          return Array.from(docInfo.querySelectorAll('input[type="text"]'));
+        }
+        
+        function getQualificationSelects() {
+          // All selects inside the qual-table tbody. If a previous upload left
+          // some selects flattened (hidden + replaced by plain text), restore
+          // them first so a fresh upload always starts from real <select>s.
+          var qualTable = document.querySelector('.qual-table');
+          if (!qualTable) return [];
+          qualTable.querySelectorAll('select.flattened-select').forEach(function(s) {
+            unflattenSelect(s);
+          });
+          return Array.from(qualTable.querySelectorAll('tbody select'));
+        }
+        
+        /* Hide a <select> and replace it with plain, non-interactive text so no
+           dropdown control (and no dropdown arrow icon) is shown at all. */
+        function flattenSelect(sel, value) {
+          sel.value = value;
+          sel.classList.add('flattened-select');
+          sel.style.display = 'none';
+          sel.setAttribute('disabled', 'disabled');
+        
+          var span = sel.nextElementSibling;
+          if (!span || !span.classList || !span.classList.contains('flattened-cell-value')) {
+            span = document.createElement('span');
+            span.className = 'flattened-cell-value';
+            sel.parentNode.insertBefore(span, sel.nextSibling);
+          }
+          span.textContent = value;
+        }
+        
+        /* Reverse of flattenSelect(): restore the <select> as a normal,
+           interactive dropdown and remove its plain-text stand-in. */
+        function unflattenSelect(sel) {
+          sel.classList.remove('flattened-select');
+          sel.style.display = '';
+          sel.removeAttribute('disabled');
+        
+          var span = sel.nextElementSibling;
+          if (span && span.classList && span.classList.contains('flattened-cell-value')) {
+            span.parentNode.removeChild(span);
+          }
+        }
+        
+        function lockNonEditableFields() {
+          // Lock all text inputs in the engineer profile
+          var docInfo = document.querySelector('.doc-info');
+          if (docInfo) {
+            docInfo.querySelectorAll('input[type="text"]').forEach(function(inp) {
+              inp.setAttribute('readonly', 'readonly');
+              inp.classList.add('upload-mode-locked');
+            });
+          }
+        
+          // Remarks column and Further Remarks textarea remain editable
+          // (NOT locked) even after a PDF upload
+          var qualTable = document.querySelector('.qual-table');
+          if (qualTable) {
+            qualTable.querySelectorAll('textarea').forEach(function(ta) {
+              ta.removeAttribute('readonly');
+              ta.classList.remove('upload-mode-locked');
+            });
+            qualTable.querySelectorAll('input[type="text"]').forEach(function(inp) {
+              inp.removeAttribute('readonly');
+              inp.classList.remove('upload-mode-locked');
+            });
+          }
+        
+          // DO NOT lock: Interviewer name 1 (row 1 in footer table), Interviewer name 2 (row 2),
+          // DQC name, date fields, and signature areas
+          // These are in the remarks-section tables at the bottom
+          var footerTables = document.querySelectorAll('.remarks-section table');
+          footerTables.forEach(function(ft) {
+            ft.querySelectorAll('input[type="text"]').forEach(function(inp) {
+              inp.removeAttribute('readonly');
+              inp.classList.remove('upload-mode-locked');
+            });
+            // Date displays remain interactive
+            ft.querySelectorAll('.date-cal-btn').forEach(function(btn) {
+              btn.style.pointerEvents = '';
+            });
+            ft.querySelectorAll('.date-hidden-picker').forEach(function(picker) {
+              picker.style.pointerEvents = '';
+            });
+          });
+        
+          // Re-enable signature file inputs and buttons
+          document.querySelectorAll('[id^="sig-input-"]').forEach(function(el) {
+            el.removeAttribute('disabled');
+          });
+          document.querySelectorAll('[id^="sig-btns-"]').forEach(function(el) {
+            el.style.pointerEvents = '';
+          });
+        }
+        
+        function resetUploadMode() {
+          uploadModeActive = false;
+          blankQualSelects = [];
+          // Remove locks from all fields
+          document.querySelectorAll('.upload-mode-locked').forEach(function(el) {
+            el.classList.remove('upload-mode-locked');
+            el.removeAttribute('readonly');
+            el.removeAttribute('disabled');
+          });
+          document.querySelectorAll('.qual-blank-highlight').forEach(function(el) {
+            el.classList.remove('qual-blank-highlight');
+          });
+          // Restore any selects that were flattened to plain text
+          document.querySelectorAll('select.flattened-select').forEach(function(sel) {
+            unflattenSelect(sel);
+          });
+          // Remove blank options from selects
+          document.querySelectorAll('select option[value=""]').forEach(function(opt) {
+            opt.parentNode.removeChild(opt);
+          });
+        }
+        
+        /* ====== Print Validation ====== */
+        function validateAndPrint() {
+          if (!uploadModeActive) {
+            window.print();
+            return;
+          }
+          // Check blank qualification selects
+          var unfilledQuals = blankQualSelects.filter(function(sel) {
+            return sel.value === '' || sel.value === null;
+          });
+          if (unfilledQuals.length > 0) {
+            alert('Please fill in all highlighted (red) qualification fields before printing.\n' +
+                  unfilledQuals.length + ' field(s) still need to be filled.');
+            if (unfilledQuals[0]) unfilledQuals[0].focus();
+            return;
+          }
+          // Check Interviewer 1 name
+          var footerTables = document.querySelectorAll('.remarks-section table');
+          var interviewer1Name = null;
+          var interviewer1Date = null;
+          var interviewer1Sig = null;
+          if (footerTables.length > 0) {
+            var rows = footerTables[0].querySelectorAll('tr');
+            // Row index 1 = Examiner 1, Row index 2 = Examiner 2, Row index 3 = DQC
+            if (rows[1]) {
+              interviewer1Name = rows[1].querySelector('input[type="text"]');
+              interviewer1Date = rows[1].querySelector('.date-display');
+              interviewer1Sig = rows[1].querySelector('img[id^="sig-img-"]');
+            }
+          }
+          var missing = [];
+          if (interviewer1Name && !interviewer1Name.value.trim()) missing.push('Interviewer 1 Name');
+          if (interviewer1Date && !interviewer1Date.value.trim()) missing.push('Interviewer 1 Date');
+          if (interviewer1Sig && !interviewer1Sig.src.startsWith('data:')) missing.push('Interviewer 1 Signature');
+          if (missing.length > 0) {
+            alert('The following required fields are not filled:\n- ' + missing.join('\n- ') +
+                  '\n\nPlease complete them before printing.');
+            return;
+          }
+          // All good - print (flattened by print CSS)
+          window.print();
+        }
     </script>
+
+<div style="bottom: 10px; right: 10px; position: absolute;"><a href="https://signatureforemail.com/?utm_source=wth_free_link&utm_medium=external" target="_blank" rel="noopener" style="font-size:11px; color: #c0c0c0;">Email Signature with Social Media Icons</a></div>
 </body>
 
 </html>
