@@ -1647,7 +1647,7 @@
           'txtr_cableelec', 'txtr_cablehv', 'txtr_cablepd', 'txtr_swgreqpt',
           'txtr_swgrhv', 'txtr_swgrpd', 'txtr_schemecheck', 'txtr_ctprisec',
           'txtr_vtsec', 'txtr_simplerelays', 'txtr_advanceprot', 'txtr_stability',
-          'txtr_endtoend', 'txtr_ftt', 'txtr_livess', '.txtr_sitecoor'
+          'txtr_endtoend', 'txtr_ftt', 'txtr_livess', 'txtr_sitecoor'
         ];
         
         var QUAL_ROW_NAMES = [
@@ -1785,14 +1785,27 @@
             var helv = await pdfDoc.embedFont(StandardFonts.Helvetica);
         
             function setTextSafe(name, value) {
-              try {
-                var field = form.getTextField(name);
-                field.setText(value || '');
-                field.updateAppearances(helv);
-                field.enableReadOnly();
-              } catch (e) {
-                console.warn('PDF field not found or not a text field:', name, e.message);
+              // The official template has at least one field (the Site
+              // Coordinator remarks cell) whose parent node has no /T name,
+              // which makes some PDF libraries resolve its fully-qualified
+              // name with a literal "undefined." prefix. Try a few sensible
+              // variants of the field name so a template quirk like that
+              // can never silently drop a value again.
+              var candidates = [name];
+              if (name.indexOf('undefined.') !== 0) candidates.push('undefined.' + name);
+              if (name.indexOf('.') === 0) candidates.push(name.slice(1));
+              else candidates.push('.' + name);
+        
+              for (var c = 0; c < candidates.length; c++) {
+                try {
+                  var field = form.getTextField(candidates[c]);
+                  field.setText(value || '');
+                  field.updateAppearances(helv);
+                  field.enableReadOnly();
+                  return;
+                } catch (e) { /* try next candidate */ }
               }
+              console.warn('PDF field not found under any known name variant:', name);
             }
         
             async function setSigSafe(name, imgEl) {
