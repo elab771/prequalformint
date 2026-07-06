@@ -1227,7 +1227,6 @@
             var img = document.getElementById('sig-img-' + uid);
             img.src = e.target.result;
             img.style.display = 'block';
-            if (typeof updateInterviewer2LockState === 'function') updateInterviewer2LockState();
           };
           reader.readAsDataURL(file);
           input.value = '';
@@ -1236,7 +1235,6 @@
           var img = document.getElementById('sig-img-' + uid);
           img.src = '';
           img.style.display = 'none';
-          if (typeof updateInterviewer2LockState === 'function') updateInterviewer2LockState();
         }
         
         /* ====== Date formatting: dd-MMM-yyyy ====== */
@@ -1250,7 +1248,6 @@
           var m = parseInt(parts[1], 10) - 1;
           var d = parts[2];
           display.value = d + '-' + months[m] + '-' + y;
-          if (typeof updateInterviewer2LockState === 'function') updateInterviewer2LockState();
         }
         
         /* ====== Upload Modal ====== */
@@ -1595,10 +1592,6 @@
           document.querySelectorAll('[id^="sig-btns-"]').forEach(function(el) {
             el.style.pointerEvents = '';
           });
-        
-          // Re-apply the Interviewer 2 lock rule on top of the above, in case
-          // Interviewer 1 was already fully filled in before this PDF upload.
-          if (typeof updateInterviewer2LockState === 'function') updateInterviewer2LockState();
         }
         
         function resetUploadMode() {
@@ -1672,78 +1665,6 @@
           if (!footerTables.length) return {};
           var rows = footerTables[0].querySelectorAll('tr');
           return { ex1: rows[1] || null, ex2: rows[2] || null };
-        }
-
-        /* ====== Interviewer 2 lock rule ======
-           As soon as Interviewer 1's Name, Date and Signature are ALL filled,
-           Interviewer 2's Name, Date and Signature fields become read-only /
-           locked - regardless of whether Interviewer 2 already has data in it
-           or is still blank. If Interviewer 1 is later made incomplete again
-           (a field is cleared), Interviewer 2 unlocks again. */
-        var interviewer2Locked = false;
-
-        function isInterviewer1Complete() {
-          var examRows = getExaminerRows();
-          if (!examRows.ex1) return false;
-          var nameInput = examRows.ex1.querySelector('input[type="text"]');
-          var dateDisplay = examRows.ex1.querySelector('.date-display');
-          var sigImg = document.getElementById('sig-img-ex1');
-          var nameFilled = !!(nameInput && nameInput.value.trim());
-          var dateFilled = !!(dateDisplay && dateDisplay.value.trim());
-          var sigFilled = !!(sigImg && sigImg.src && sigImg.src.indexOf('data:') === 0);
-          return nameFilled && dateFilled && sigFilled;
-        }
-
-        function setInterviewer2Locked(locked) {
-          var examRows = getExaminerRows();
-          var row = examRows.ex2;
-          if (!row) return;
-          var nameInput = row.querySelector('input[type="text"]');
-          var dateDisplay = row.querySelector('.date-display');
-          var dateCalBtn = row.querySelector('.date-cal-btn');
-          var datePicker = row.querySelector('.date-hidden-picker');
-          var sigBtns = document.getElementById('sig-btns-ex2');
-          var sigInput = document.getElementById('sig-input-ex2');
-
-          if (nameInput) {
-            if (locked) { nameInput.setAttribute('readonly', 'readonly'); nameInput.classList.add('upload-mode-locked'); }
-            else { nameInput.removeAttribute('readonly'); nameInput.classList.remove('upload-mode-locked'); }
-          }
-          if (dateDisplay) {
-            if (locked) dateDisplay.classList.add('upload-mode-locked');
-            else dateDisplay.classList.remove('upload-mode-locked');
-          }
-          if (dateCalBtn) {
-            if (locked) { dateCalBtn.setAttribute('disabled', 'disabled'); dateCalBtn.classList.add('upload-mode-locked'); }
-            else { dateCalBtn.removeAttribute('disabled'); dateCalBtn.classList.remove('upload-mode-locked'); }
-          }
-          if (datePicker) {
-            if (locked) datePicker.setAttribute('disabled', 'disabled');
-            else datePicker.removeAttribute('disabled');
-          }
-          if (sigBtns) {
-            if (locked) sigBtns.classList.add('upload-mode-locked');
-            else sigBtns.classList.remove('upload-mode-locked');
-          }
-          if (sigInput) {
-            if (locked) sigInput.setAttribute('disabled', 'disabled');
-            else sigInput.removeAttribute('disabled');
-          }
-
-          interviewer2Locked = locked;
-        }
-
-        function updateInterviewer2LockState() {
-          setInterviewer2Locked(isInterviewer1Complete());
-        }
-
-        function initInterviewerLock() {
-          var examRows = getExaminerRows();
-          if (examRows.ex1) {
-            var ex1Name = examRows.ex1.querySelector('input[type="text"]');
-            if (ex1Name) ex1Name.addEventListener('input', updateInterviewer2LockState);
-          }
-          updateInterviewer2LockState();
         }
         
         /* ====== Print Validation ====== */
@@ -1990,7 +1911,6 @@
           clearSig('ex2');
         
           resetUploadMode();
-          updateInterviewer2LockState();
         }
         
         function resetFormClick() {
@@ -2090,7 +2010,6 @@
               if (img) { img.src = e.sig; img.style.display = 'block'; }
             }
           });
-          updateInterviewer2LockState();
         }
         
         function initFormPersistence() {
@@ -2114,10 +2033,7 @@
           document.addEventListener('change', saveFormState);
         }
         
-        window.addEventListener('load', function() {
-          initFormPersistence();
-          initInterviewerLock();
-        });
+        window.addEventListener('load', initFormPersistence);
     </script>
 </body>
 
