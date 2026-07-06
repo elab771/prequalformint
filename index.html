@@ -1489,7 +1489,7 @@
           lockNonEditableFields();
         
           uploadModeActive = true;
-          alert('PDF data loaded successfully.\\n\\nFields highlighted in RED must be filled in before printing.\\nFill the blank qualification fields, Interviewer names, DQC name, dates, and signatures.');
+          alert('PDF data loaded successfully.\n\nFields highlighted in RED must be filled in before printing.\nFill the blank qualification fields, Interviewer names, DQC name, dates, and signatures.');
         }
         
         function getEngineerProfileInputs() {
@@ -1682,7 +1682,7 @@
               return sel.value === '' || sel.value === null;
             });
             if (unfilledQuals.length > 0) {
-              alert('Please fill in all highlighted (red) qualification fields before printing.\\n' +
+              alert('Please fill in all highlighted (red) qualification fields before printing.\n' +
                     unfilledQuals.length + ' field(s) still need to be filled.');
               unfilledQuals[0].focus();
               return;
@@ -1743,8 +1743,8 @@
           }
         
           if (missing.length > 0) {
-            alert('The following required fields are not filled:\\n- ' + missing.join('\\n- ') +
-                  '\\n\\nPlease complete them before printing.');
+            alert('The following required fields are not filled:\n- ' + missing.join('\n- ') +
+                  '\n\nPlease complete them before printing.');
             if (firstInvalidEl && typeof firstInvalidEl.focus === 'function') firstInvalidEl.focus();
             return;
           }
@@ -1767,7 +1767,6 @@
           var PDFDocument = PDFLib.PDFDocument;
           var StandardFonts = PDFLib.StandardFonts;
           var ImageAlignment = PDFLib.ImageAlignment;
-          var PDFName = PDFLib.PDFName;
         
           try {
             var existingPdfBytes = await fetch('prequalform_int.pdf').then(function(res) {
@@ -1777,16 +1776,6 @@
         
             var pdfDoc = await PDFDocument.load(existingPdfBytes);
             var form = pdfDoc.getForm();
-            
-            // --- FIX FOR SIGNATURE BUTTON (imgsigdivcoor) ---
-            // Adobe Acrobat sometimes regenerates field appearances on load if NeedAppearances is true.
-            // When it regenerates an empty image button, it drops the "Icon Only" property and reverts to "Label Only".
-            // Deleting NeedAppearances forces Acrobat to respect the exact field properties saved in the file.
-            if (form.acroForm) {
-              form.acroForm.dict.delete(PDFName.of('NeedAppearances'));
-            }
-            // ------------------------------------------------
-
             var helv = await pdfDoc.embedFont(StandardFonts.Helvetica);
         
             function setTextSafe(name, value) {
@@ -1885,11 +1874,11 @@
             document.body.removeChild(a);
             setTimeout(function() { URL.revokeObjectURL(url); }, 5000);
         
-            alert('The Pre-Qualification form was generated successfully.\\n\\nFile: ' + filename +
-                  '\\n(saved to your browser\\'s default Downloads folder)\\n\\n' +
+            alert('The Pre-Qualification form was generated successfully.\n\nFile: ' + filename +
+                  '\n(saved to your browser\'s default Downloads folder)\n\n' +
                   'This file is ready to be sent to the Divisional Qualification Coordinator for his digital signature.');
           } catch (err) {
-            alert('Could not generate the PDF file.\\n\\n' + err.message);
+            alert('Could not generate the PDF file.\n\n' + err.message);
           }
         }
         
@@ -1925,7 +1914,7 @@
         }
         
         function resetFormClick() {
-          var ok = confirm('Are you sure you want to reset/clear the form?\\n\\nAll entered data will be permanently lost and cannot be undone.');
+          var ok = confirm('Are you sure you want to reset/clear the form?\n\nAll entered data will be permanently lost and cannot be undone.');
           if (!ok) return;
           clearAllFieldsToDefault();
           clearSavedFormState();
@@ -2031,7 +2020,7 @@
           } catch (e) { saved = null; }
         
           if (saved && hasMeaningfulState(saved)) {
-            var wantsReset = confirm('You have data saved from a previous session (e.g. from before this page was refreshed).\\n\\nClick OK to RESET/CLEAR the form and start fresh.\\nClick Cancel to KEEP your previous data.');
+            var wantsReset = confirm('You have data saved from a previous session (e.g. from before this page was refreshed).\n\nClick OK to RESET/CLEAR the form and start fresh.\nClick Cancel to KEEP your previous data.');
             if (wantsReset) {
               clearSavedFormState();
             } else {
