@@ -1753,7 +1753,7 @@
           generateFilledPdf();
         }
         
-        /* ====== Official PDF Generation (fills prequalform_int.pdf via pdf-lib) ======
+/* ====== Official PDF Generation (fills prequalform_int.pdf via pdf-lib) ======
            Acquires: Engineer Profile fields (except CSD ID No / Revision No),
            the Qualification dropdowns, the per-row Remarks, Further Remarks, and
            the Interviewer (Examiner) names/dates/signatures. The Divisional
@@ -1767,6 +1767,9 @@
           var PDFDocument = PDFLib.PDFDocument;
           var StandardFonts = PDFLib.StandardFonts;
           var ImageAlignment = PDFLib.ImageAlignment;
+          
+          // ADDITION 1: Define PDFName so we can modify internal dictionary properties
+          var PDFName = PDFLib.PDFName; 
         
           try {
             var existingPdfBytes = await fetch('prequalform_int.pdf').then(function(res) {
@@ -1776,6 +1779,16 @@
         
             var pdfDoc = await PDFDocument.load(existingPdfBytes);
             var form = pdfDoc.getForm();
+            
+            // ADDITION 2: FIX FOR SIGNATURE BUTTON (imgsigdivcoor)
+            // Adobe Acrobat sometimes regenerates field appearances on load if NeedAppearances is true.
+            // When it regenerates an empty image button, it drops the "Icon Only" property and reverts to "Label Only".
+            // Deleting NeedAppearances forces Acrobat to respect the exact field properties saved in the file.
+            if (form.acroForm) {
+              form.acroForm.dict.delete(PDFName.of('NeedAppearances'));
+            }
+            // ------------------------------------------------
+
             var helv = await pdfDoc.embedFont(StandardFonts.Helvetica);
         
             function setTextSafe(name, value) {
