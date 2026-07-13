@@ -83,6 +83,11 @@
             background-color: #004085;
         }
 
+        .print-btn:disabled {
+            background-color: #7a94ab;
+            cursor: not-allowed;
+        }
+
         .logo-box {
             width: 25%;
             text-align: center;
@@ -246,6 +251,12 @@
             outline: 2px solid #e00 !important;
         }
 
+        .remarks-blank-highlight {
+            background-color: #fff6db !important;
+            border: 1px solid #d6a000 !important;
+            outline: 1px solid #d6a000 !important;
+        }
+
         .flattened-cell-value {
             display: block;
             width: 100%;
@@ -403,6 +414,12 @@
                 border: none !important;
                 outline: none !important;
             }
+
+            .remarks-blank-highlight {
+                background-color: transparent !important;
+                border: none !important;
+                outline: none !important;
+            }
         }
     </style>
     <style>
@@ -468,7 +485,7 @@
             <div class="modal-btns"><button class="modal-btn-cancel" onclick="closeUploadModal()">Cancel</button> <button class="modal-btn-ok" onclick="processUploadedPDF()">Upload</button></div>
         </div>
     </div>
-    <div class="action-bar"><button class="upload-btn no-print" onclick="openUploadModal()">📄 Upload PDF</button> <button class="reset-btn no-print" onclick="resetFormClick()" type="button">🗑 Reset / Clear Form</button> <button class="print-btn" onclick="validateAndPrint()">Print Form</button></div>
+    <div class="action-bar"><button class="upload-btn no-print" onclick="openUploadModal()">📄 Upload PDF</button> <button class="reset-btn no-print" onclick="resetFormClick()" type="button">🗑 Reset / Clear Form</button> <button class="print-btn no-print" id="print-form-btn" onclick="validateAndPrint()">Print Form</button></div>
     <div class="page-container">
         <table class="top-header-table" style="border-collapse: collapse; border: rgb(0, 0, 0); width: 100%; padding: 1px;">
             <tbody>
@@ -1489,7 +1506,7 @@
           lockNonEditableFields();
         
           uploadModeActive = true;
-          alert('PDF data loaded successfully.\n\nFields highlighted in RED must be filled in before printing.\nFill the blank qualification fields, Interviewer names, DQC name, dates, and signatures.');
+          alert('PDF data loaded successfully.\n\nFields highlighted in RED must be filled in before printing.\nFill the blank qualification fields, Interviewer names, DQC name, dates, and signatures.\n\nRemarks fields (highlighted in YELLOW once a dropdown is set to *YES) are only unlocked for rows that still have a fillable dropdown, and must be filled whenever *YES is selected.');
         }
         
         function getEngineerProfileInputs() {
@@ -1553,19 +1570,18 @@
             });
           }
         
-          // Remarks column and Further Remarks textarea remain editable
-          // (NOT locked) even after a PDF upload
-          var qualTable = document.querySelector('.qual-table');
-          if (qualTable) {
-            qualTable.querySelectorAll('textarea').forEach(function(ta) {
-              ta.removeAttribute('readonly');
-              ta.classList.remove('upload-mode-locked');
-            });
-            qualTable.querySelectorAll('input[type="text"]').forEach(function(inp) {
-              inp.removeAttribute('readonly');
-              inp.classList.remove('upload-mode-locked');
-            });
+          // Further Remarks (the free-text box under the qualification grid)
+          // always stays editable, upload or no upload.
+          var furtherRemarksEl = getFurtherRemarksTextarea();
+          if (furtherRemarksEl) {
+            furtherRemarksEl.removeAttribute('readonly');
+            furtherRemarksEl.classList.remove('upload-mode-locked');
           }
+        
+          // Per-row Remarks fields: only the rows that still have a fillable
+          // (blank/highlighted) dropdown get an unlocked Remarks field, and
+          // even then only while that row's dropdown(s) are set to "*YES".
+          applyRemarksLockRules();
         
           // DO NOT lock: Interviewer name 1 (row 1 in footer table), Interviewer name 2 (row 2),
           // DQC name, date fields, and signature areas
@@ -1594,6 +1610,70 @@
           });
         }
         
+        /* ====== Remarks lock/unlock rules (post-upload only) ======
+           For every qualification row:
+             - If the row has NO fillable (blank/highlighted) dropdown left
+               (i.e. every dropdown in that row was flattened to a fixed
+               value from the uploaded PDF), its Remarks field is locked.
+             - If the row DOES have at least one fillable dropdown, the
+               Remarks field's lock state tracks the current value(s) of
+               those dropdown(s):
+                 * value is "" (blank/unselected), "NO", or "YES"
+                   -> Remarks is cleared, locked, and read-only.
+                 * value is "*YES" (on any of the row's fillable dropdowns)
+                   -> Remarks is unlocked, fillable, and highlighted until
+                      filled in.
+           A change listener is attached to each fillable dropdown so this
+           state re-evaluates live as the user makes selections. */
+        function applyRemarksLockRules() {
+          var rows = getQualDataRows();
+          var remarksInputs = getQualRemarksInputs();
+        
+          rows.forEach(function(row, idx) {
+            var remarksInput = remarksInputs[idx];
+            if (!remarksInput) return;
+        
+            var rowFillableSelects = Array.from(row.querySelectorAll('select')).filter(function(sel) {
+              return blankQualSelects.indexOf(sel) !== -1;
+            });
+        
+            if (rowFillableSelects.length === 0) {
+              // No fillable dropdown in this row -> Remarks stays locked
+              remarksInput.setAttribute('readonly', 'readonly');
+              remarksInput.classList.add('upload-mode-locked');
+              remarksInput.classList.remove('remarks-blank-highlight');
+              return;
+            }
+        
+            // Row has at least one fillable dropdown: sync the initial state
+            // and wire up live updates as the user changes the dropdown(s).
+            updateRowRemarksState(remarksInput, rowFillableSelects);
+            rowFillableSelects.forEach(function(sel) {
+              if (!sel._remarksListenerAttached) {
+                sel.addEventListener('change', function() {
+                  updateRowRemarksState(remarksInput, rowFillableSelects);
+                });
+                sel._remarksListenerAttached = true;
+              }
+            });
+          });
+        }
+        
+        function updateRowRemarksState(remarksInput, fillableSelects) {
+          var hasStarYes = fillableSelects.some(function(sel) { return sel.value === '*YES'; });
+          if (hasStarYes) {
+            remarksInput.removeAttribute('readonly');
+            remarksInput.classList.remove('upload-mode-locked');
+            remarksInput.classList.add('remarks-blank-highlight');
+          } else {
+            // Blank, NO, or YES -> Remarks must be null and locked
+            remarksInput.value = '';
+            remarksInput.setAttribute('readonly', 'readonly');
+            remarksInput.classList.add('upload-mode-locked');
+            remarksInput.classList.remove('remarks-blank-highlight');
+          }
+        }
+        
         function resetUploadMode() {
           uploadModeActive = false;
           blankQualSelects = [];
@@ -1605,6 +1685,9 @@
           });
           document.querySelectorAll('.qual-blank-highlight').forEach(function(el) {
             el.classList.remove('qual-blank-highlight');
+          });
+          document.querySelectorAll('.remarks-blank-highlight').forEach(function(el) {
+            el.classList.remove('remarks-blank-highlight');
           });
           // Restore any selects that were flattened to plain text
           document.querySelectorAll('select.flattened-select').forEach(function(sel) {
@@ -1758,7 +1841,32 @@
            the Qualification dropdowns, the per-row Remarks, Further Remarks, and
            the Interviewer (Examiner) names/dates/signatures. The Divisional
            Qualification Coordinator fields and CSD ID No / Revision No are left
-           untouched and remain fillable for CSD / the DQC to complete later. */
+           untouched and remain fillable for CSD / the DQC to complete later.
+        
+           Performance / reliability notes:
+           - The template bytes (prequalform_int.pdf) are fetched once and
+             cached in memory (templatePdfBytesCache) so repeated Print Form
+             clicks do not re-download the template each time - this was the
+             main cause of the "slow" print step.
+           - The Print Form button is disabled with a "Generating..." label
+             while the fill/save runs, so a slow first-time fetch is visible
+             to the user instead of looking like a hang.
+           - Browser "tracking prevention" features can block access to
+             storage (localStorage/cookies/cache) for some page contexts.
+             That only affects the auto-save-to-localStorage convenience
+             feature (see saveFormState below) - it is unrelated to, and
+             does not block, the actual PDF fetch/fill/download below, which
+             uses only fetch() and in-memory data. */
+        var templatePdfBytesCache = null;
+        
+        async function loadTemplatePdfBytes() {
+          if (templatePdfBytesCache) return templatePdfBytesCache;
+          var res = await fetch('prequalform_int.pdf', { cache: 'force-cache' });
+          if (!res.ok) throw new Error('Could not load "prequalform_int.pdf" (HTTP ' + res.status + '). Make sure this file is placed in the same folder as this form.');
+          templatePdfBytesCache = await res.arrayBuffer();
+          return templatePdfBytesCache;
+        }
+        
         async function generateFilledPdf() {
           if (typeof PDFLib === 'undefined') {
             alert('The PDF generation library did not load. Please check your internet connection and try again.');
@@ -1771,11 +1879,20 @@
           // ADDITION 1: Define PDFName so we can modify internal dictionary properties
           var PDFName = PDFLib.PDFName; 
         
+          var printBtn = document.getElementById('print-form-btn');
+          var printBtnOriginalText = printBtn ? printBtn.textContent : null;
+          if (printBtn) {
+            printBtn.disabled = true;
+            printBtn.textContent = 'Generating…';
+          }
+        
           try {
-            var existingPdfBytes = await fetch('prequalform_int.pdf').then(function(res) {
-              if (!res.ok) throw new Error('Could not load "prequalform_int.pdf" (HTTP ' + res.status + '). Make sure this file is placed in the same folder as this form.');
-              return res.arrayBuffer();
-            });
+            // Cached after the first successful fetch, so subsequent prints
+            // skip the network round-trip entirely and run noticeably faster.
+            var templateBytes = await loadTemplatePdfBytes();
+            // pdf-lib may detach/transfer the buffer it's given, so hand it a
+            // fresh copy each time rather than the cached original.
+            var existingPdfBytes = templateBytes.slice(0);
         
             var pdfDoc = await PDFDocument.load(existingPdfBytes);
             var form = pdfDoc.getForm();
@@ -1891,7 +2008,15 @@
                   '\n(saved to your browser\'s default Downloads folder)\n\n' +
                   'This file is ready to be sent to the Divisional Qualification Coordinator for his digital signature.');
           } catch (err) {
+            // Reset the cache on failure so a transient network error doesn't
+            // permanently stick us with a bad/empty cached response.
+            templatePdfBytesCache = null;
             alert('Could not generate the PDF file.\n\n' + err.message);
+          } finally {
+            if (printBtn) {
+              printBtn.disabled = false;
+              printBtn.textContent = printBtnOriginalText || 'Print Form';
+            }
           }
         }
         
@@ -1939,8 +2064,29 @@
            form to localStorage as the user types, then ask the question as soon
            as the page loads back up: choosing to reset clears the saved data (and
            the form stays blank); choosing not to reset restores the saved data,
-           so the webform effectively does not reset. */
+           so the webform effectively does not reset.
+        
+           Some browsers (Safari/Edge "Tracking Prevention", strict privacy
+           modes, sandboxed/third-party iframe contexts, etc.) block access to
+           localStorage entirely and can log a "tracking prevention blocked
+           access to storage" warning. storageAvailable is checked once up
+           front so we never repeatedly hit a blocked API (which was adding
+           needless overhead / noisy failures on every keystroke), and every
+           persistence function below becomes a safe no-op when storage isn't
+           available - the form still works normally, it just won't remember
+           data across a hard refresh. */
         var FORM_STORAGE_KEY = 'prequalForm_TP-NG-6450-010-003_state';
+        
+        var storageAvailable = (function() {
+          try {
+            var testKey = '__prequal_storage_test__';
+            localStorage.setItem(testKey, '1');
+            localStorage.removeItem(testKey);
+            return true;
+          } catch (e) {
+            return false;
+          }
+        })();
         
         function serializeFormState() {
           var state = { profile: [], quals: [], remarks: [], furtherRemarks: '', examiners: {} };
@@ -1968,11 +2114,21 @@
           return state;
         }
         
+        // Debounced so rapid typing across many fields (there are dozens of
+        // inputs on this form) coalesces into a single localStorage write
+        // instead of one write per keystroke/change event - this was another
+        // source of the reported sluggishness.
+        var saveFormStateTimer = null;
         function saveFormState() {
-          try { localStorage.setItem(FORM_STORAGE_KEY, JSON.stringify(serializeFormState())); } catch (e) { /* storage unavailable */ }
+          if (!storageAvailable) return;
+          if (saveFormStateTimer) clearTimeout(saveFormStateTimer);
+          saveFormStateTimer = setTimeout(function() {
+            try { localStorage.setItem(FORM_STORAGE_KEY, JSON.stringify(serializeFormState())); } catch (e) { /* storage unavailable */ }
+          }, 400);
         }
         
         function clearSavedFormState() {
+          if (!storageAvailable) return;
           try { localStorage.removeItem(FORM_STORAGE_KEY); } catch (e) { /* ignore */ }
         }
         
@@ -2026,6 +2182,8 @@
         }
         
         function initFormPersistence() {
+          if (!storageAvailable) return;
+        
           var saved = null;
           try {
             var raw = localStorage.getItem(FORM_STORAGE_KEY);
