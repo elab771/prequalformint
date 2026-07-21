@@ -224,8 +224,7 @@
             overflow: auto;
         }
 
-        /* Auto-resizing fields (Engineer Name / Company Name): grow to fit
-           2+ lines of content instead of clipping or scrolling */
+        /* Auto-resizing fields */
         .auto-resize-field {
             resize: none;
             overflow: hidden;
@@ -266,6 +265,12 @@
             font-family: Arial, Helvetica, sans-serif;
             user-select: none;
         }
+
+        /* Specific value color highlighting */
+        .val-no { color: #ff0000 !important; font-weight: bold !important; }
+        .val-yes { color: #008000 !important; font-weight: bold !important; }
+        .val-syes { color: #0000ff !important; font-weight: bold !important; }
+        .val-blue { color: #0000ff !important; }
 
         /* Upload button styling */
         .upload-btn {
@@ -417,7 +422,6 @@
                 background: transparent;
             }
 
-            /* Flatten: remove highlight on print */
             .qual-blank-highlight {
                 background-color: transparent !important;
                 border: none !important;
@@ -1245,6 +1249,7 @@
           }
         
           lockNonEditableFields();
+          updateFieldColors();
         
           uploadModeActive = true;
           if (typeof scheduleScalePageForMobile === 'function') scheduleScalePageForMobile();
@@ -1568,8 +1573,9 @@
             }
 
             var helv = await pdfDoc.embedFont(StandardFonts.Helvetica);
+            var helvBold = await pdfDoc.embedFont(StandardFonts.HelveticaBold);
         
-            function setTextSafe(name, value) {
+            function setTextSafe(name, value, colorStr, isBold) {
               var candidates = [name];
               if (name.indexOf('undefined.') !== 0) candidates.push('undefined.' + name);
               if (name.indexOf('.') === 0) candidates.push(name.slice(1));
@@ -1578,8 +1584,17 @@
               for (var c = 0; c < candidates.length; c++) {
                 try {
                   var field = form.getTextField(candidates[c]);
+                  
+                  if (colorStr) {
+                      var da = field.acroField.get(PDFName.of('DA'));
+                      var daText = da ? da.value() : '/Helv 10 Tf';
+                      daText = daText.replace(/\b(\d+(\.\d+)?\s+)+(rg|g|k)\b/g, '').trim();
+                      daText += ' ' + colorStr;
+                      field.acroField.set(PDFName.of('DA'), PDFLib.PDFString.of(daText));
+                  }
+                  
                   field.setText(value || '');
-                  field.updateAppearances(helv);
+                  field.updateAppearances(isBold ? helvBold : helv);
                   field.enableReadOnly();
                   return;
                 } catch (e) { }
@@ -1603,21 +1618,37 @@
         
             var profileInputs = getEngineerProfileInputs();
             for (var p = 0; p < PROFILE_FIELD_MAP.length && p < profileInputs.length; p++) {
-              setTextSafe(PROFILE_FIELD_MAP[p], profileInputs[p].value.trim());
+              setTextSafe(PROFILE_FIELD_MAP[p], profileInputs[p].value.trim(), null, false);
             }
         
             var qualSelects = getQualificationSelects();
             for (var i = 0; i < qualSelects.length && i < QUAL_FIELD_MAP.length; i++) {
-              setTextSafe(QUAL_FIELD_MAP[i], qualSelects[i].value);
+              var fName = QUAL_FIELD_MAP[i];
+              var val = qualSelects[i].value;
+              var isCSD = fName && fName.startsWith('ctxt');
+              var colorStr = null;
+              var isBold = false;
+              
+              if (isCSD) {
+                  if (val === 'NO') { colorStr = '1 0 0 rg'; isBold = true; } 
+                  else if (val === 'YES') { colorStr = '0 0.5 0 rg'; isBold = true; }
+                  else if (val === '*YES') { colorStr = '0 0 1 rg'; isBold = true; }
+              }
+              
+              setTextSafe(fName, val, colorStr, isBold);
             }
         
             var remarksInputs = getQualRemarksInputs();
             for (var r = 0; r < REMARKS_FIELD_MAP.length && r < remarksInputs.length; r++) {
-              if (remarksInputs[r]) setTextSafe(REMARKS_FIELD_MAP[r], remarksInputs[r].value.trim());
+              if (remarksInputs[r]) {
+                  var val = remarksInputs[r].value.trim();
+                  var colorStr = (val !== '') ? '0 0 1 rg' : null;
+                  setTextSafe(REMARKS_FIELD_MAP[r], val, colorStr, false);
+              }
             }
         
             var furtherRemarksEl = getFurtherRemarksTextarea();
-            setTextSafe('txt_furtherremarks', furtherRemarksEl ? furtherRemarksEl.value.trim() : '');
+            setTextSafe('txt_furtherremarks', furtherRemarksEl ? furtherRemarksEl.value.trim() : '', null, false);
         
             var examRows = getExaminerRows();
             var ex1NameInput = examRows.ex1 ? examRows.ex1.querySelector('input[type="text"]') : null;
@@ -1627,10 +1658,10 @@
             var ex2DateInput = examRows.ex2 ? examRows.ex2.querySelector('.date-display') : null;
             var ex2SigImg = examRows.ex2 ? examRows.ex2.querySelector('img[id^="sig-img-"]') : null;
         
-            setTextSafe('txtinterviewer1', ex1NameInput ? ex1NameInput.value.trim() : '');
-            setTextSafe('txtinterviewer1signdate', ex1DateInput ? ex1DateInput.value.trim() : '');
-            setTextSafe('txtinterviewer2', ex2NameInput ? ex2NameInput.value.trim() : '');
-            setTextSafe('txtinterviewer2signdate', ex2DateInput ? ex2DateInput.value.trim() : '');
+            setTextSafe('txtinterviewer1', ex1NameInput ? ex1NameInput.value.trim() : '', null, false);
+            setTextSafe('txtinterviewer1signdate', ex1DateInput ? ex1DateInput.value.trim() : '', null, false);
+            setTextSafe('txtinterviewer2', ex2NameInput ? ex2NameInput.value.trim() : '', null, false);
+            setTextSafe('txtinterviewer2signdate', ex2DateInput ? ex2DateInput.value.trim() : '', null, false);
         
             await setSigSafe('img_sig1', ex1SigImg);
             await setSigSafe('img_sig2', ex2SigImg);
@@ -1639,12 +1670,21 @@
             var blob = new Blob([pdfBytes], { type: 'application/pdf' });
             var url = URL.createObjectURL(blob);
         
+            // Calculate dynamic filename 
+            var companyInput = profileInputs[1];
+            var companyFullName = companyInput && companyInput.value.trim() ? companyInput.value.trim() : 'COMP';
+            var company_id = companyFullName.split(/[\s-]/)[0];
+            if (!company_id) company_id = 'COMP';
+
             var identityInput = profileInputs[5];
             var iqama = (identityInput && identityInput.value.trim()) ? identityInput.value.trim().replace(/[^a-zA-Z0-9]/g, '') : 'UNKNOWN';
+            
             var now = new Date();
+            var months = ['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
             function pad(n) { return String(n).padStart(2, '0'); }
-            var stamp = now.getFullYear() + pad(now.getMonth() + 1) + pad(now.getDate()) + '_' + pad(now.getHours()) + pad(now.getMinutes()) + pad(now.getSeconds());
-            var filename = iqama + '_prequalresult_' + stamp + '.pdf';
+            var ddmmmyy = pad(now.getDate()) + months[now.getMonth()] + String(now.getFullYear()).slice(-2);
+            
+            var filename = "intres_" + company_id + "_" + iqama + "_" + ddmmmyy + ".pdf";
         
             var a = document.createElement('a');
             a.href = url;
@@ -1698,6 +1738,7 @@
         
           resetUploadMode();
           lockEntireForm();
+          updateFieldColors();
           if (typeof scheduleScalePageForMobile === 'function') scheduleScalePageForMobile();
         }
         
@@ -1829,12 +1870,46 @@
             } else {
               resetUploadMode();
               restoreFormState(saved);
+              updateFieldColors();
             }
           }
         
           document.addEventListener('input', saveFormState);
           document.addEventListener('change', saveFormState);
         }
+
+        /* ====== Dynamic HTML Visual Formatting ====== */
+        function updateFieldColors() {
+            var selects = getQualificationSelects();
+            selects.forEach(function(sel, i) {
+                var fName = QUAL_FIELD_MAP[i];
+                if (fName && fName.startsWith('ctxt')) {
+                    sel.classList.remove('val-no', 'val-yes', 'val-syes');
+                    if (sel.value === 'NO') sel.classList.add('val-no');
+                    else if (sel.value === 'YES') sel.classList.add('val-yes');
+                    else if (sel.value === '*YES') sel.classList.add('val-syes');
+                    
+                    var span = sel.nextElementSibling;
+                    if (span && span.classList.contains('flattened-cell-value')) {
+                         span.classList.remove('val-no', 'val-yes', 'val-syes');
+                         if (sel.value === 'NO') span.classList.add('val-no');
+                         else if (sel.value === 'YES') span.classList.add('val-yes');
+                         else if (sel.value === '*YES') span.classList.add('val-syes');
+                    }
+                }
+            });
+            
+            var remarks = getQualRemarksInputs();
+            remarks.forEach(function(inp) {
+                if (inp) {
+                    if (inp.value.trim() !== '') inp.classList.add('val-blue');
+                    else inp.classList.remove('val-blue');
+                }
+            });
+        }
+        
+        document.addEventListener('change', updateFieldColors);
+        document.addEventListener('input', updateFieldColors);
         
         window.addEventListener('load', initFormPersistence);
     </script>
