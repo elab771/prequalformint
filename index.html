@@ -1568,6 +1568,7 @@
             }
 
             var helv = await pdfDoc.embedFont(StandardFonts.Helvetica);
+            var rgb = PDFLib.rgb;
         
             function setTextSafe(name, value) {
               var candidates = [name];
@@ -1579,7 +1580,19 @@
                 try {
                   var field = form.getTextField(candidates[c]);
                   field.setText(value || '');
-                  field.updateAppearances(helv);
+                  var v=(value||'').trim();
+                  field.setFont(helv);
+                  if(name.startsWith('ctxt')){
+                    if(v==='NO') field.setTextColor(rgb(1,0,0));
+                    else if(v==='YES') field.setTextColor(rgb(0,0.6,0));
+                    else if(v==='*YES') field.setTextColor(rgb(0,0,1));
+                    field.updateAppearances(helv);
+                  } else if(name.startsWith('remark')){
+                    field.setTextColor(rgb(0,0,1));
+                    field.updateAppearances(helv);
+                  } else {
+                    field.updateAppearances(helv);
+                  }
                   field.enableReadOnly();
                   return;
                 } catch (e) { }
@@ -1641,10 +1654,14 @@
         
             var identityInput = profileInputs[5];
             var iqama = (identityInput && identityInput.value.trim()) ? identityInput.value.trim().replace(/[^a-zA-Z0-9]/g, '') : 'UNKNOWN';
+            var companyName=(profileInputs[1]&&profileInputs[1].value.trim())||'';
+            var m=companyName.match(/^[^ -]+/);
+            var companyId=m?m[0]:'UNKNOWN';
             var now = new Date();
-            function pad(n) { return String(n).padStart(2, '0'); }
-            var stamp = now.getFullYear() + pad(now.getMonth() + 1) + pad(now.getDate()) + '_' + pad(now.getHours()) + pad(now.getMinutes()) + pad(now.getSeconds());
-            var filename = iqama + '_prequalresult_' + stamp + '.pdf';
+            var mons=['JAN','FEB','MAR','APR','MAY','JUN','JUL','AUG','SEP','OCT','NOV','DEC'];
+            function pad(n){return String(n).padStart(2,'0');}
+            var dateStr=pad(now.getDate())+mons[now.getMonth()]+String(now.getFullYear()).slice(-2);
+            var filename='intres_'+companyId+'_'+iqama+'_'+dateStr+'.pdf';
         
             var a = document.createElement('a');
             a.href = url;
