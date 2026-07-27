@@ -475,6 +475,16 @@
             pointer-events: none;
         }
 
+        /* iOS/Safari fallback state: when showPicker() isn't supported, the
+           hidden picker is temporarily made interactive/visible-ish so the
+           native iOS date wheel can be triggered by a direct tap/focus. */
+        .date-hidden-picker.ios-fallback-active {
+            width: 100%;
+            height: 100%;
+            opacity: 0.01;
+            pointer-events: auto;
+        }
+
         @media print {
             .date-cal-btn {
                 display: none !important;
@@ -558,9 +568,6 @@
 </head>
 
 <body>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.min.js"></script>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/pdf-lib/1.17.1/pdf-lib.min.js"></script>
-
     <div id="upload-modal">
         <div id="upload-modal-box">
             <h3>Upload Pre-Qualification Form</h3>
@@ -921,7 +928,7 @@
                             <td style="width: 4.7946%; text-align: center; border: 1px solid rgb(0, 0, 0); background-color: rgb(255, 255, 255); height: 20px;"><span style="font-size: 11px;">1</span></td>
                             <td colspan="2" style="width: 50.154%; border: 1px solid rgb(0, 0, 0); background-color: rgb(255, 255, 255); height: 20px; padding: 0px;"><input class="cell-input" style="font-size:11px;" type="text"></td>
                             <td style="width: 19.0431%; border: 1px solid rgb(0, 0, 0); background-color: rgb(255, 255, 255); height: 20px; text-align: center; padding: 2px;">
-                                <div class="date-cell"><input class="date-display" placeholder="" readonly="" type="text"><button class="date-cal-btn no-print" onclick="this.parentNode.querySelector('.date-hidden-picker').showPicker()" type="button">📅</button><input class="date-hidden-picker" onchange="formatDateField(this)" type="date"></div>
+                                <div class="date-cell"><input class="date-display" placeholder="" readonly="" type="text"><button class="date-cal-btn no-print" onclick="openDatePicker(this)" type="button">📅</button><input class="date-hidden-picker" onchange="formatDateField(this)" type="date"></div>
                             </td>
                             <td style="width: 26.854%; border: 1px solid rgb(0, 0, 0); background-color: rgb(255, 255, 255); height: 38px; text-align: center; padding: 0px; vertical-align: middle;">
                                 <div style="position:relative;width:100%;height:38px;overflow:hidden;"><img alt="" id="sig-img-ex1" src="" style="margin: 0 auto 0 0; display: block; top: 0px; left: 0px; width: 100%; height: 100%; object-fit: contain;">
@@ -933,7 +940,7 @@
                             <td style="width: 4.7946%; text-align: center; border: 1px solid rgb(0, 0, 0); background-color: rgb(255, 255, 255); height: 20px;"><span style="font-size: 11px;">2</span></td>
                             <td colspan="2" style="width: 50.154%; border: 1px solid rgb(0, 0, 0); background-color: rgb(255, 255, 255); height: 20px; padding: 0px;"><input class="cell-input" style="font-size:11px;" type="text"></td>
                             <td style="width: 19.0431%; border: 1px solid rgb(0, 0, 0); height: 20px; text-align: center; padding: 2px;">
-                                <div class="date-cell"><input class="date-display" placeholder="" readonly="" type="text"><button class="date-cal-btn no-print" onclick="this.parentNode.querySelector('.date-hidden-picker').showPicker()" type="button">📅</button><input class="date-hidden-picker" onchange="formatDateField(this)" type="date"></div>
+                                <div class="date-cell"><input class="date-display" placeholder="" readonly="" type="text"><button class="date-cal-btn no-print" onclick="openDatePicker(this)" type="button">📅</button><input class="date-hidden-picker" onchange="formatDateField(this)" type="date"></div>
                             </td>
                             <td style="width: 26.854%; border: 1px solid rgb(0, 0, 0); height: 38px; text-align: center; padding: 0px; vertical-align: middle;">
                                 <div style="position:relative;width:100%;height:38px;overflow:hidden;"><img alt="" id="sig-img-ex2" src="" style="margin: 0 auto 0 0; display: block; top: 0px; left: 0px; width: 100%; height: 100%; object-fit: contain;">
@@ -952,6 +959,43 @@
     </div>
     </div>
     <script>
+        /* ====== Lazy-load heavy PDF libraries ======
+           pdf.js and pdf-lib are only needed when the user actually uploads
+           a PDF or generates/prints one. Loading them eagerly at the top of
+           <body> was blocking initial page render/interactivity, especially
+           on slow connections. They are now fetched on demand and cached. */
+        var PDFJS_SRC = 'https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.min.js';
+        var PDFJS_WORKER_SRC = 'https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.worker.min.js';
+        var PDFLIB_SRC = 'https://cdnjs.cloudflare.com/ajax/libs/pdf-lib/1.17.1/pdf-lib.min.js';
+
+        var _scriptLoadPromises = {};
+        function loadScriptOnce(src) {
+          if (_scriptLoadPromises[src]) return _scriptLoadPromises[src];
+          _scriptLoadPromises[src] = new Promise(function(resolve, reject) {
+            var s = document.createElement('script');
+            s.src = src;
+            s.async = true;
+            s.onload = function() { resolve(); };
+            s.onerror = function() { reject(new Error('Failed to load script: ' + src)); };
+            document.head.appendChild(s);
+          });
+          return _scriptLoadPromises[src];
+        }
+
+        function ensurePdfJsLoaded() {
+          if (typeof pdfjsLib !== 'undefined') return Promise.resolve();
+          return loadScriptOnce(PDFJS_SRC).then(function() {
+            if (typeof pdfjsLib !== 'undefined') {
+              pdfjsLib.GlobalWorkerOptions.workerSrc = PDFJS_WORKER_SRC;
+            }
+          });
+        }
+
+        function ensurePdfLibLoaded() {
+          if (typeof PDFLib !== 'undefined') return Promise.resolve();
+          return loadScriptOnce(PDFLIB_SRC);
+        }
+
         /* ====== Lock Form on Load ====== */
         function lockEntireForm() {
           var container = document.querySelector('.page-container');
@@ -1156,6 +1200,52 @@
           var m = parseInt(parts[1], 10) - 1;
           var d = parts[2];
           display.value = d + '-' + months[m] + '-' + y;
+          // Deactivate the iOS fallback interactive state once a value is chosen
+          picker.classList.remove('ios-fallback-active');
+        }
+
+        /* ====== Date picker trigger (with Safari/iOS fallback) ======
+           Element.showPicker() is not supported in Safari versions before
+           16.4 (iOS and macOS), and calling it there throws, which makes
+           the calendar button appear completely unresponsive. This wraps
+           the call and falls back to focusing/clicking the native hidden
+           <input type="date"> directly, which still triggers the native
+           iOS date wheel even without showPicker() support. */
+        function openDatePicker(btn) {
+          var picker = btn.parentNode.querySelector('.date-hidden-picker');
+          if (!picker) return;
+
+          if (typeof picker.showPicker === 'function') {
+            try {
+              picker.showPicker();
+              return;
+            } catch (e) {
+              // fall through to the manual fallback below
+            }
+          }
+
+          // Fallback: briefly make the native date input directly
+          // interactable/tappable so iOS/older Safari opens its own
+          // date wheel when the input receives focus/a tap.
+          picker.classList.add('ios-fallback-active');
+          picker.focus();
+          if (typeof picker.click === 'function') {
+            picker.click();
+          }
+
+          // If nothing happened (no change/blur), clean up the fallback
+          // state after a short delay so the invisible input doesn't stay
+          // tappable indefinitely over the calendar icon.
+          setTimeout(function() {
+            if (document.activeElement !== picker) {
+              picker.classList.remove('ios-fallback-active');
+            }
+          }, 4000);
+
+          picker.addEventListener('blur', function onBlur() {
+            picker.classList.remove('ios-fallback-active');
+            picker.removeEventListener('blur', onBlur);
+          });
         }
         
         /* ====== Upload Modal ====== */
@@ -1179,6 +1269,13 @@
           var input = document.getElementById('pdf-file-input');
           var file = input.files[0];
           if (!file) { showModalMsg('Please select a PDF file.'); return; }
+          showModalMsg('Loading PDF tools, please wait...');
+          try {
+            await ensurePdfJsLoaded();
+          } catch (e) {
+            showModalMsg('Could not load the PDF library. Please check your internet connection and try again.');
+            return;
+          }
           showModalMsg('Processing PDF, please wait...');
           try {
             var arrayBuffer = await file.arrayBuffer();
@@ -1186,7 +1283,6 @@
               showModalMsg('PDF library not loaded. Please check your internet connection.');
               return;
             }
-            pdfjsLib.GlobalWorkerOptions.workerSrc = 'https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.worker.min.js';
             var pdf = await pdfjsLib.getDocument({ data: arrayBuffer }).promise;
             var fieldMap = await buildFieldMap(pdf);
             if (!fieldMap || Object.keys(fieldMap).length === 0) {
@@ -1645,8 +1741,30 @@
         }
         
         async function generateFilledPdf() {
+          var printBtn = document.getElementById('print-form-btn');
+          var printBtnOriginalText = printBtn ? printBtn.textContent : null;
+          if (printBtn) {
+            printBtn.disabled = true;
+            printBtn.textContent = 'Loading…';
+          }
+
+          try {
+            await ensurePdfLibLoaded();
+          } catch (e) {
+            alert('The PDF generation library did not load. Please check your internet connection and try again.');
+            if (printBtn) {
+              printBtn.disabled = false;
+              printBtn.textContent = printBtnOriginalText || 'Print Form';
+            }
+            return;
+          }
+
           if (typeof PDFLib === 'undefined') {
             alert('The PDF generation library did not load. Please check your internet connection and try again.');
+            if (printBtn) {
+              printBtn.disabled = false;
+              printBtn.textContent = printBtnOriginalText || 'Print Form';
+            }
             return;
           }
           var PDFDocument = PDFLib.PDFDocument;
@@ -1654,10 +1772,7 @@
           var ImageAlignment = PDFLib.ImageAlignment;
           var PDFName = PDFLib.PDFName; 
         
-          var printBtn = document.getElementById('print-form-btn');
-          var printBtnOriginalText = printBtn ? printBtn.textContent : null;
           if (printBtn) {
-            printBtn.disabled = true;
             printBtn.textContent = 'Generating…';
           }
         
