@@ -996,6 +996,16 @@
           return loadScriptOnce(PDFLIB_SRC);
         }
 
+        /* ====== iOS / iPadOS detection ======
+           Used to route PDF delivery through window.open() + Share sheet
+           instead of a silent <a download> click, since iOS Safari gives
+           no visible confirmation for programmatic downloads and users
+           can't find the resulting file. */
+        function isIOS() {
+          return /iP(hone|od|ad)/.test(navigator.userAgent) ||
+                 (navigator.platform === 'MacIntel' && navigator.maxTouchPoints > 1); // iPadOS (reports as Mac)
+        }
+
         /* ====== Lock Form on Load ====== */
         function lockEntireForm() {
           var container = document.querySelector('.page-container');
@@ -1898,17 +1908,29 @@
             var dateStamp = formatDdMmmYy(new Date());
             var filename = 'intres_' + companyId + '_' + iqama + '_' + dateStamp + '.pdf';
         
-            var a = document.createElement('a');
-            a.href = url;
-            a.download = filename;
-            document.body.appendChild(a);
-            a.click();
-            document.body.removeChild(a);
-            setTimeout(function() { URL.revokeObjectURL(url); }, 5000);
+            if (isIOS()) {
+              // iOS Safari gives no visible confirmation for a programmatic
+              // <a download> click, and the resulting file is hard for users
+              // to locate. Open the PDF in a new tab instead, where the user
+              // gets an explicit Share icon -> "Save to Files" action.
+              window.open(url, '_blank');
+              alert('Your form "' + filename + '" opened in a new tab.\n\n' +
+                    'To save it: tap the Share icon (square with an arrow pointing up) at the top of the screen, then choose "Save to Files" and pick a location.\n\n' +
+                    'This file is ready to be sent to the Divisional Qualification Coordinator for his digital signature.');
+            } else {
+              var a = document.createElement('a');
+              a.href = url;
+              a.download = filename;
+              document.body.appendChild(a);
+              a.click();
+              document.body.removeChild(a);
         
-            alert('The Pre-Qualification form was generated successfully.\n\nFile: ' + filename +
-                  '\n(saved to your browser\'s default Downloads folder)\n\n' +
-                  'This file is ready to be sent to the Divisional Qualification Coordinator for his digital signature.');
+              alert('The Pre-Qualification form was generated successfully.\n\nFile: ' + filename +
+                    '\n(saved to your browser\'s default Downloads folder)\n\n' +
+                    'This file is ready to be sent to the Divisional Qualification Coordinator for his digital signature.');
+            }
+        
+            setTimeout(function() { URL.revokeObjectURL(url); }, 30000);
           } catch (err) {
             templatePdfBytesCache = null;
             alert('Could not generate the PDF file.\n\n' + err.message);
