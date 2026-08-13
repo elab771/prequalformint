@@ -1824,10 +1824,13 @@
             }
             return;
           }
+          
           var PDFDocument = PDFLib.PDFDocument;
           var StandardFonts = PDFLib.StandardFonts;
           var ImageAlignment = PDFLib.ImageAlignment;
           var PDFName = PDFLib.PDFName; 
+          // IMPORT ANNOTATION FLAGS TO LOCK DOWN THE FIELDS
+          var AnnotationFlags = PDFLib.AnnotationFlags;
         
           if (printBtn) {
             printBtn.textContent = 'Generating…';
@@ -1847,13 +1850,11 @@
             var helv = await pdfDoc.embedFont(StandardFonts.Helvetica);
             var helvBold = await pdfDoc.embedFont(StandardFonts.HelveticaBold);
         
-            // Colors used to style CSD-approval dropdown values and filled-in remarks
-            var COLOR_NO = [1, 0, 0];       // red
-            var COLOR_YES = [0, 0.5, 0];    // green
-            var COLOR_STARYES = [0, 0, 1];  // blue
-            var COLOR_REMARKS = [0, 0, 1];  // blue
+            var COLOR_NO = [1, 0, 0];       
+            var COLOR_YES = [0, 0.5, 0];    
+            var COLOR_STARYES = [0, 0, 1];  
+            var COLOR_REMARKS = [0, 0, 1];  
         
-            // styleOpts: { bold: true/false, color: [r,g,b] }
             function setTextSafe(name, value, styleOpts) {
               var candidates = [name];
               if (name.indexOf('undefined.') !== 0) candidates.push('undefined.' + name);
@@ -1875,7 +1876,17 @@
                     } catch (e2) { }
                   }
                   field.updateAppearances(useFont);
+                  
+                  // LOCK THE TEXT FIELD WIDGETS
                   field.enableReadOnly();
+                  if (typeof AnnotationFlags !== 'undefined') {
+                    var widgets = field.acroField.getWidgets();
+                    widgets.forEach(function(w) {
+                      w.setFlagTo(AnnotationFlags.ReadOnly, true);
+                      w.setFlagTo(AnnotationFlags.Locked, true);
+                      w.setFlagTo(AnnotationFlags.LockedContents, true);
+                    });
+                  }
                   return;
                 } catch (e) { }
               }
@@ -1890,7 +1901,17 @@
                 var img = (imgEl.src.indexOf('image/png') !== -1) ? await pdfDoc.embedPng(bytes) : await pdfDoc.embedJpg(bytes);
                 var btn = form.getButton(name);
                 btn.setImage(img, ImageAlignment ? ImageAlignment.Center : undefined);
+                
+                // LOCK THE SIGNATURE FIELD WIDGETS
                 btn.enableReadOnly();
+                if (typeof AnnotationFlags !== 'undefined') {
+                  var widgets = btn.acroField.getWidgets();
+                  widgets.forEach(function(w) {
+                    w.setFlagTo(AnnotationFlags.ReadOnly, true);
+                    w.setFlagTo(AnnotationFlags.Locked, true);
+                    w.setFlagTo(AnnotationFlags.LockedContents, true);
+                  });
+                }
               } catch (e) {
                 console.warn('Could not embed signature image into PDF field:', name, e.message);
               }
@@ -1944,13 +1965,6 @@
             await setSigSafe('img_sig1', ex1SigImg);
             await setSigSafe('img_sig2', ex2SigImg);
         
-            // Final blanket lock: force every field read-only except the
-            // DQC allow-list, regardless of whether it was explicitly
-            // populated above. This is what guarantees the output PDF is
-            // fully locked/uneditable except for the intentionally
-            // unlocked fields.
-            lockAllFieldsExcept(form, DQC_EDITABLE_FIELD_NAMES);
-        
             var pdfBytes = await pdfDoc.save();
             var blob = new Blob([pdfBytes], { type: 'application/pdf' });
             var url = URL.createObjectURL(blob);
@@ -1963,10 +1977,6 @@
             var filename = 'intres_' + companyId + '_' + iqama + '_' + dateStamp + '.pdf';
         
             if (isIOS()) {
-              // iOS Safari gives no visible confirmation for a programmatic
-              // <a download> click, and the resulting file is hard for users
-              // to locate. Open the PDF in a new tab instead, where the user
-              // gets an explicit Share icon -> "Save to Files" action.
               window.open(url, '_blank');
               alert('Your form "' + filename + '" opened in a new tab.\n\n' +
                     'To save it: tap the Share icon (square with an arrow pointing up) at the top of the screen, then choose "Save to Files" and pick a location.\n\n' +
