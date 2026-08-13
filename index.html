@@ -1739,6 +1739,53 @@
           return dd + mmm + yy;
         }
         
+        /* ====== Output PDF locking ======
+           The generated PDF must be uneditable except for the fields the
+           Divisional Qualification Coordinator (DQC) needs to fill in and
+           sign AFTER receiving the file (per the note printed on the form:
+           "The Divisional qualification coordinator shall digitally sign
+           after receiving the generated pdf file of this form."). Every
+           other AcroForm field - whether or not this script explicitly
+           writes to it - is force-locked (read-only) in a single blanket
+           pass right before the PDF is saved. This is done independently
+           of the per-field field.enableReadOnly() calls sprinkled through
+           setTextSafe()/setSigSafe() above, so that:
+             1) the whole document is guaranteed locked even if a field is
+                missed by, or absent from, the hardcoded name maps above, and
+             2) the lock still applies even if this template's PDF fields
+                are edited/added to in the future.
+        */
+        var DQC_EDITABLE_FIELD_NAMES = [
+          'txtdivqualcoor',           // DQC name
+          'txtdivqualcoorsigndate',   // DQC sign date
+          'imgsigdivcoor',            // DQC signature image field
+          'btn_addimg',               // "+" upload-signature button (DQC)
+          'btn_delimg',               // "-" delete-signature button (DQC)
+          'HiddenBlank'               // helper button paired with the above
+        ];
+
+        function lockAllFieldsExcept(form, editableNames) {
+          var editableSet = {};
+          editableNames.forEach(function(n) { editableSet[n] = true; });
+
+          form.getFields().forEach(function(field) {
+            var name = field.getName();
+            // Compare both the full (possibly dotted/qualified) name and
+            // its leaf segment, since some fields in this template are
+            // nested under a blank parent (e.g. ".txtr_sitecoor").
+            var leaf = name.indexOf('.') !== -1 ? name.slice(name.lastIndexOf('.') + 1) : name;
+            if (editableSet[name] || editableSet[leaf]) return;
+
+            try {
+              if (typeof field.enableReadOnly === 'function') {
+                field.enableReadOnly();
+              }
+            } catch (e) {
+              console.warn('Could not lock PDF field:', name, e.message);
+            }
+          });
+        }
+
         /* ====== Official PDF Generation ====== */
         var templatePdfBytesCache = null;
         
@@ -1896,6 +1943,13 @@
         
             await setSigSafe('img_sig1', ex1SigImg);
             await setSigSafe('img_sig2', ex2SigImg);
+        
+            // Final blanket lock: force every field read-only except the
+            // DQC allow-list, regardless of whether it was explicitly
+            // populated above. This is what guarantees the output PDF is
+            // fully locked/uneditable except for the intentionally
+            // unlocked fields.
+            lockAllFieldsExcept(form, DQC_EDITABLE_FIELD_NAMES);
         
             var pdfBytes = await pdfDoc.save();
             var blob = new Blob([pdfBytes], { type: 'application/pdf' });
