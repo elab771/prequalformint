@@ -1849,15 +1849,36 @@
                   var field = form.getTextField(candidates[c]);
                   field.setText(value || '');
                   
-                  // ALWAYS use Helvetica Bold
+                  // ALWAYS use Helvetica Bold for rendering
                   var useFont = helvBold; 
+                  // Use specific font size, default to 11 if not explicitly passed
+                  var fontSize = (styleOpts && styleOpts.fontSize !== undefined) ? styleOpts.fontSize : 11;
                   
                   try {
-                    var daParts = [];
-                    if (styleOpts && styleOpts.color) daParts.push(styleOpts.color.join(' ') + ' rg');
-                    daParts.push('/HeBo 0 Tf'); // Sets font to Helvetica Bold
-                    field.acroField.setDefaultAppearance(daParts.join(' '));
-                  } catch (e2) { }
+                    // Update font size safely using pdf-lib API if available
+                    if (typeof field.setFontSize === 'function') {
+                      field.setFontSize(fontSize);
+                    } else {
+                      // Fallback: manually update the Default Appearance (DA) string 
+                      // to force size 11 and bold while keeping the field's internal font reference intact
+                      var da = field.acroField.getDefaultAppearance() || '';
+                      
+                      // Extract the existing font name (e.g., /F1 or /Helv) to avoid Acrobat errors
+                      var fontNameMatch = da.match(/\/([A-Za-z0-9_-]+)/);
+                      var fontName = fontNameMatch ? fontNameMatch[1] : 'Helv';
+                      
+                      // Rebuild the string with correct color and new size
+                      var colorStr = (styleOpts && styleOpts.color) ? styleOpts.color.join(' ') + ' rg' : '0 0 0 rg';
+                      var newDa = colorStr + ' /' + fontName + ' ' + fontSize + ' Tf';
+                      
+                      field.acroField.setDefaultAppearance(newDa);
+                      if (typeof field.acroField.getWidgets === 'function') {
+                        field.acroField.getWidgets().forEach(function(w) {
+                          w.setDefaultAppearance(newDa);
+                        });
+                      }
+                    }
+                  } catch (e2) { console.warn("Failed to set font size internally:", e2); }
                   
                   field.updateAppearances(useFont);
                   return;
@@ -1889,11 +1910,12 @@
               var qFieldName = QUAL_FIELD_MAP[i];
               var qValue = qualSelects[i].value;
               var qIsCsdField = qFieldName && qFieldName.indexOf('ctxt') === 0;
-              var qStyle = null;
+              // Dropdowns maintain their auto-scaling size via { fontSize: 0 }
+              var qStyle = { fontSize: 0 }; 
               if (qIsCsdField) {
-                if (qValue === 'NO') qStyle = { color: COLOR_NO };
-                else if (qValue === 'YES') qStyle = { color: COLOR_YES };
-                else if (qValue === '*YES') qStyle = { color: COLOR_STARYES };
+                if (qValue === 'NO') qStyle.color = COLOR_NO;
+                else if (qValue === 'YES') qStyle.color = COLOR_YES;
+                else if (qValue === '*YES') qStyle.color = COLOR_STARYES;
               }
               setTextSafe(qFieldName, qValue, qStyle);
             }
