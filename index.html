@@ -1,150 +1,405 @@
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>International Contractor Prequalification Form</title>
-  <link rel="stylesheet" href="style.css">
+    <meta charset="utf-8">
+    <meta content="width=device-width, initial-scale=1.0, maximum-scale=5.0, user-scalable=yes" name="viewport">
+    <title>Pre-Qualification Approval Form</title>
+    <link rel="stylesheet" href="style.css">
 </head>
+
 <body>
-
-  <div class="form-container">
-    <header class="form-header">
-      <div class="logo-area">
-        <img src="nglogo.jpg" alt="Company Logo" class="logo" onerror="this.style.display='none'">
-      </div>
-      <div class="header-title">
-        <h1>VENDOR &amp; CONTRACTOR PREQUALIFICATION</h1>
-        <p>International Standard Compliance &amp; Due Diligence Record</p>
-      </div>
-    </header>
-
-    <div class="action-bar no-print">
-      <button type="button" class="btn btn-print" onclick="prepareAndPrint()">Print / Save as Secured PDF</button>
-      <button type="button" class="btn btn-reset" onclick="resetForm()">Reset Form</button>
+    <div id="upload-modal">
+        <div id="upload-modal-box">
+            <h3>Upload Pre-Qualification Form</h3>
+            <p>Please select the <strong>prequalform.pdf</strong> file to upload. Only the first page will be processed.</p><input accept="application/pdf" id="pdf-file-input" style="font-size:13px;margin-bottom:4px;" type="file">
+            <div class="modal-msg" id="upload-modal-msg"><br></div>
+            <div class="modal-btns"><button class="modal-btn-cancel" onclick="closeUploadModal()">Cancel</button> <button class="modal-btn-ok" onclick="processUploadedPDF()">Upload</button></div>
+        </div>
     </div>
-
-    <form id="prequalForm">
-      <!-- Section 1: General Information -->
-      <fieldset class="form-section">
-        <legend>1. General Company Information</legend>
-        <div class="grid-2">
-          <div class="form-group">
-            <label for="companyLegalName">Company Legal Name:</label>
-            <input type="text" id="companyLegalName" name="companyLegalName" required>
-          </div>
-          <div class="form-group">
-            <label for="tradeName">Trading Name (if different):</label>
-            <input type="text" id="tradeName" name="tradeName">
-          </div>
+    
+    <div class="action-bar"><button class="upload-btn no-print" onclick="openUploadModal()">📄 Upload PDF</button> <button class="reset-btn no-print" onclick="resetFormClick()" type="button">🗑 Reset / Clear Form</button> <button class="print-btn no-print" id="print-form-btn" onclick="validateAndPrint()">Print Form</button></div>
+    
+    <div class="page-scale-wrapper">
+    <div class="page-container">
+        <table class="top-header-table" style="border-collapse: collapse; border: rgb(0, 0, 0); width: 100%; padding: 1px;">
+            <tbody>
+                <tr>
+                    <td class="logo-box" style="width: 37.4652%; text-align: left; vertical-align: bottom; border: rgb(0, 0, 0); padding: 1px;"><span style="font-size: 12px;">Commissioning Services Department</span></td>
+                    <td class="title-box" style="width: 25.0696%; border: rgb(0, 0, 0); padding: 1px;"><img src="nglogo.jpg" style="width: 133px;"></td>
+                    <td class="title-box" style="width: 37.4652%; text-align: right; vertical-align: bottom; border: rgb(0, 0, 0); padding: 1px;"><span style="font-size: 12px;">TP-NG-6450-010-003, R03</span></td>
+                </tr>
+                <tr>
+                    <td colspan="3" style="width: 99.8607%; text-align: center; background-color: rgb(255, 255, 255); border-width: medium; border-style: double none none; border-color: rgb(0, 0, 0); padding: 1px;"><br><span style="font-size: 12px;"><strong>Pre-Qualification Approval Form for T&amp;C Contractor Engineer</strong></span></td>
+                </tr>
+            </tbody>
+        </table>
+        <div class="page-border-wrapper">
+            <table class="doc-info" style="border-collapse: collapse; border: rgb(0, 0, 0); width: 100%; font-family: Arial, Helvetica, sans-serif;">
+                <tbody>
+                    <tr>
+                        <td class="bg-gray" style="width: 11.5656%; background-color: rgb(255, 255, 255); border: rgb(0, 0, 0);"><span style="font-size: 10px;">Name</span></td>
+                        <td style="width: 1.9337%; padding: 1px; text-align: center; border: rgb(0, 0, 0);"><strong>:</strong></td>
+                        <td style="width: 36.0497%; border-width: medium medium 1px; border-style: none none solid; border-color: rgb(0, 0, 0); padding: 0px; vertical-align: middle;"><textarea class="cell-input auto-resize-field" rows="1"></textarea></td>
+                        <td class="bg-gray" style="width: 16.3611%; background-color: rgb(255, 255, 255); border: rgb(0, 0, 0);"><span style="font-size: 10px;">Company Name</span></td>
+                        <td style="width: 1.8336%; padding: 1px; text-align: center; border: rgb(0, 0, 0);"><strong>:</strong></td>
+                        <td colspan="4" style="width: 31.8758%; border-width: medium medium 1px; border-style: none none solid; border-color: rgb(0, 0, 0); padding:0; vertical-align: middle;"><textarea class="cell-input auto-resize-field" rows="1"></textarea></td>
+                    </tr>
+                    <tr>
+                        <td class="bg-gray" style="width: 11.5656%; background-color: rgb(255, 255, 255); border: rgb(0, 0, 0);"><span style="font-size: 10px;">Nationality</span></td>
+                        <td style="width: 1.9337%; padding: 1px; text-align: center; border: rgb(0, 0, 0);"><strong>:</strong></td>
+                        <td style="width: 36.0497%; border-width: medium medium 1px; border-style: none none solid; border-color: rgb(0, 0, 0); padding: 0px;"><input class="cell-input" type="text"></td>
+                        <td class="bg-gray" style="width: 16.3611%; background-color: rgb(255, 255, 255); border: rgb(0, 0, 0);"><span style="font-size: 10px;">Total Experience</span></td>
+                        <td style="width: 1.8336%; padding: 1px; text-align: center; border: rgb(0, 0, 0);"><strong>:</strong></td>
+                        <td style="width: 9.9789%; border-width: medium medium 1px; border-style: none none solid; border-color: rgb(0, 0, 0); padding:0; text-align:center;"><input class="cell-input" style="text-align:center;" type="text"></td>
+                        <td style="width: 6.3623%; background-color: rgb(255, 255, 255); text-align: center; border: rgb(0, 0, 0);"><strong><span style="font-size: 10px;">Years</span></strong></td>
+                        <td class="bg-gray" style="width: 6.7774%; background-color: rgb(255, 255, 255); border-width: medium medium 1px; border-style: none none solid; border-color: rgb(0, 0, 0); padding: 0px; text-align: center;"><input class="cell-input" style="text-align:center;" type="text"></td>
+                        <td class="bg-gray" style="width: 8.7744%; background-color: rgb(255, 255, 255); text-align: center; border: rgb(0, 0, 0);"><span style="font-size: 10px;">Months</span></td>
+                    </tr>
+                    <tr>
+                        <td class="bg-gray" style="width: 11.5656%; background-color: rgb(255, 255, 255); border: rgb(0, 0, 0);"><span style="font-size: 10px;">Identity No<br></span></td>
+                        <td style="width: 1.9337%; padding: 1px; text-align: center; border: rgb(0, 0, 0);"><strong>:</strong></td>
+                        <td style="width: 36.0497%; border-width: medium medium 1px; border-style: none none solid; border-color: rgb(0, 0, 0); padding: 0px;"><input class="cell-input" type="text"></td>
+                        <td style="width: 16.3611%; background-color: rgb(255, 255, 255); border: rgb(0, 0, 0);"><strong><span style="font-size: 10px;">Experience in KSA</span></strong></td>
+                        <td style="width: 1.8336%; text-align: center; border: rgb(0, 0, 0);"><strong>:</strong></td>
+                        <td style="width: 9.9789%; background-color: rgb(255, 255, 255); border-width: medium medium 1px; border-style: none none solid; border-color: rgb(0, 0, 0); padding:0; text-align:center;"><input class="cell-input" style="text-align:center;" type="text"></td>
+                        <td style="width: 6.3623%; background-color: rgb(255, 255, 255); text-align: center; border: rgb(0, 0, 0);"><strong><span style="font-size: 10px;">Years</span></strong><br></td>
+                        <td style="width: 6.7774%; background-color: rgb(255, 255, 255); border-width: medium medium 1px; border-style: none none solid; border-color: rgb(0, 0, 0); padding: 0px; text-align: center;"><input class="cell-input" style="text-align:center;" type="text"></td>
+                        <td style="width: 8.7744%; background-color: rgb(255, 255, 255); text-align: center; border: rgb(0, 0, 0);"><strong><span style="font-size: 10px;">Months</span></strong><br></td>
+                    </tr>
+                    <tr>
+                        <td class="bg-gray" style="width: 11.5656%; background-color: rgb(255, 255, 255); border: rgb(0, 0, 0);"><span style="font-size: 10px;">CSD ID No</span></td>
+                        <td style="text-align: center; width: 1.9337%; border: rgb(0, 0, 0);"><strong>:</strong></td>
+                        <td style="text-align: right; width: 36.0497%; border-width: medium medium 1px; border-style: none none solid; border-color: rgb(0, 0, 0);"><br></td>
+                        <td style="text-align: left; padding-right: 15px; background-color: rgb(255, 255, 255); width: 16.3611%; border: rgb(0, 0, 0);"><strong><span style="font-size: 10px;">Contact No</span></strong></td>
+                        <td style="text-align: center; padding: 1px; width: 1.8336%; border: rgb(0, 0, 0);"><strong>:</strong></td>
+                        <td colspan="4" style="text-align: left; width: 31.8758%; background-color: rgb(255, 255, 255); border-width: medium medium 1px; border-style: none none solid; border-color: rgb(0, 0, 0); padding:0;"><input class="cell-input" type="text"></td>
+                    </tr>
+                    <tr>
+                        <td class="bg-gray" style="width: 11.5656%; background-color: rgb(255, 255, 255); border: rgb(0, 0, 0);"><span style="font-size: 10px;">Revision No</span></td>
+                        <td style="width: 1.9337%; padding: 1px; text-align: center; border: rgb(0, 0, 0);"><strong>:</strong></td>
+                        <td style="width: 36.0497%; border-width: medium medium 1px; border-style: none none solid; border-color: rgb(0, 0, 0);"><br></td>
+                        <td colspan="6" style="width: 50.1145%; background-color: rgb(255, 255, 255); border: rgb(0, 0, 0);"><br></td>
+                    </tr>
+                </tbody>
+            </table>
+            <p><br></p>
+            <div style="flex:1 1 0;overflow:hidden;display:flex;flex-direction:column;min-height:0;">
+                <table class="qual-table" style="font-family: Arial, Helvetica, sans-serif; border-collapse: collapse; border: 2px solid rgb(0, 0, 0); width: 100%;">
+                    <thead>
+                        <tr>
+                            <th rowspan="2" style="width: 3%; border: 2px solid rgb(0, 0, 0);"><span style="font-size: 12px;">#</span></th>
+                            <th rowspan="2" style="width:24%; border: 2px solid rgb(0, 0, 0);"><span style="font-size: 12px;">QUALIFICATIONS</span></th>
+                            <th colspan="3" style="width:20%; border: 2px solid rgb(0, 0, 0);"><span style="font-size: 12px;">To be Filled by<br>T&amp;C Contractor</span></th>
+                            <th colspan="3" style="width:20%; border: 2px solid rgb(0, 0, 0);"><span style="font-size: 12px;">To be Filled by<br>CSD Approval</span></th>
+                            <th rowspan="2" style="width:33%; border: 2px solid rgb(0, 0, 0);"><span style="font-size: 12px;">REMARKS</span></th>
+                        </tr>
+                        <tr>
+                            <th style="width: 7.203%; border: 2px solid rgb(0, 0, 0);"><span style="font-size: 12px;">MV</span></th>
+                            <th style="width: 7.2343%; border: 2px solid rgb(0, 0, 0);"><span style="font-size: 12px;">HV</span></th>
+                            <th style="width: 7.0821%; border: 2px solid rgb(0, 0, 0);"><span style="font-size: 12px;">EHV</span></th>
+                            <th style="width: 7.5301%; border: 2px solid rgb(0, 0, 0);"><span style="font-size: 12px;">MV</span></th>
+                            <th style="width: 7.6537%; border: 2px solid rgb(0, 0, 0);"><span style="font-size: 12px;">HV</span></th>
+                            <th style="width: 7.3999%; border: 2px solid rgb(0, 0, 0);"><span style="font-size: 12px;">EHV</span></th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr>
+                            <td style="border: 2px solid rgb(0, 0, 0);"><span style="font-size: 11px;">1</span></td>
+                            <td class="text-left" style="border: 2px solid rgb(0, 0, 0); width: 24.7352%;"><span style="font-size: 11px;">Batteries&amp;Chargers</span></td>
+                            <td colspan="3" style="width: 21.4685%; border: 2px solid rgb(0, 0, 0); padding:0; text-align:center;"><select style="width:85%;border:none;outline:none;margin:0 auto;display:block;font-size:11px;font-family:Arial,Helvetica,sans-serif;cursor:pointer;text-align:center;">&nbsp;<option value="NO">NO</option><option value="YES">YES</option><option value="*YES">*YES</option>&nbsp; &nbsp;&nbsp;&nbsp;</select></td>
+                            <td colspan="3" style="width: 22.5129%; border: 2px solid rgb(0, 0, 0); padding:0; text-align:center;"><select style="width:85%;border:none;outline:none;margin:0 auto;display:block;font-size:11px;font-family:Arial,Helvetica,sans-serif;cursor:pointer;text-align:center;">&nbsp;<option value="NO">NO</option><option value="YES">YES</option><option value="*YES">*YES</option>&nbsp; &nbsp;&nbsp;&nbsp;</select></td>
+                            <td style="border: 2px solid rgb(0, 0, 0); width: 27.9665%; padding:0;"><input class="cell-input" style="height:100%;" type="text"></td>
+                        </tr>
+                        <tr>
+                            <td style="border: 2px solid rgb(0, 0, 0);"><span style="font-size: 11px;">2</span></td>
+                            <td class="text-left" style="border: 2px solid rgb(0, 0, 0); width: 24.7352%;"><span style="font-size: 11px;">ACDB&amp;DCDB</span></td>
+                            <td colspan="3" style="width: 21.4685%; border: 2px solid rgb(0, 0, 0); padding:0; text-align:center;"><select style="width:85%;border:none;outline:none;margin:0 auto;display:block;font-size:11px;font-family:Arial,Helvetica,sans-serif;cursor:pointer;text-align:center;">&nbsp;<option value="NO">NO</option><option value="YES">YES</option><option value="*YES">*YES</option>&nbsp; &nbsp;&nbsp;&nbsp;</select></td>
+                            <td colspan="3" style="width: 22.5129%; border: 2px solid rgb(0, 0, 0); padding:0; text-align:center;"><select style="width:85%;border:none;outline:none;margin:0 auto;display:block;font-size:11px;font-family:Arial,Helvetica,sans-serif;cursor:pointer;text-align:center;">&nbsp;<option value="NO">NO</option><option value="YES">YES</option><option value="*YES">*YES</option>&nbsp; &nbsp;&nbsp;&nbsp;</select></td>
+                            <td style="border: 2px solid rgb(0, 0, 0); width: 27.9665%; padding:0;"><input class="cell-input" style="height:100%;" type="text"></td>
+                        </tr>
+                        <tr>
+                            <td style="border: 2px solid rgb(0, 0, 0);"><span style="font-size: 11px;">3</span></td>
+                            <td class="text-left" style="border: 2px solid rgb(0, 0, 0); width: 24.7352%;"><span style="font-size: 11px;">Aux./Trip Relays&amp;MCCB</span></td>
+                            <td colspan="3" style="width: 21.4685%; border: 2px solid rgb(0, 0, 0); padding:0; text-align:center;"><select style="width:85%;border:none;outline:none;margin:0 auto;display:block;font-size:11px;font-family:Arial,Helvetica,sans-serif;cursor:pointer;text-align:center;">&nbsp;<option value="NO">NO</option><option value="YES">YES</option><option value="*YES">*YES</option>&nbsp; &nbsp;&nbsp;&nbsp;</select></td>
+                            <td colspan="3" style="width: 22.5129%; border: 2px solid rgb(0, 0, 0); padding:0; text-align:center;"><select style="width:85%;border:none;outline:none;margin:0 auto;display:block;font-size:11px;font-family:Arial,Helvetica,sans-serif;cursor:pointer;text-align:center;">&nbsp;<option value="NO">NO</option><option value="YES">YES</option><option value="*YES">*YES</option>&nbsp; &nbsp;&nbsp;&nbsp;</select></td>
+                            <td style="border: 2px solid rgb(0, 0, 0); width: 27.9665%; padding:0;"><input class="cell-input" style="height:100%;" type="text"></td>
+                        </tr>
+                        <tr>
+                            <td style="border: 2px solid rgb(0, 0, 0);"><span style="font-size: 11px;">4</span></td>
+                            <td class="text-left" style="border: 2px solid rgb(0, 0, 0); width: 24.7352%;"><span style="font-size: 11px;">Meters</span></td>
+                            <td colspan="3" style="width: 21.4685%; border: 2px solid rgb(0, 0, 0); padding:0; text-align:center;"><select style="width:85%;border:none;outline:none;margin:0 auto;display:block;font-size:11px;font-family:Arial,Helvetica,sans-serif;cursor:pointer;text-align:center;">&nbsp;<option value="NO">NO</option><option value="YES">YES</option><option value="*YES">*YES</option>&nbsp; &nbsp;&nbsp;&nbsp;</select></td>
+                            <td colspan="3" style="width: 22.5129%; border: 2px solid rgb(0, 0, 0); padding:0; text-align:center;"><select style="width:85%;border:none;outline:none;margin:0 auto;display:block;font-size:11px;font-family:Arial,Helvetica,sans-serif;cursor:pointer;text-align:center;">&nbsp;<option value="NO">NO</option><option value="YES">YES</option><option value="*YES">*YES</option>&nbsp; &nbsp;&nbsp;&nbsp;</select></td>
+                            <td style="border: 2px solid rgb(0, 0, 0); width: 27.9665%; padding:0;"><input class="cell-input" style="height:100%;" type="text"></td>
+                        </tr>
+                        <tr>
+                            <td style="border: 2px solid rgb(0, 0, 0);"><span style="font-size: 11px;">5</span></td>
+                            <td class="text-left" style="border: 2px solid rgb(0, 0, 0); width: 24.7352%;"><span style="font-size: 11px;">Power Transformer</span></td>
+                            <td style="border: 2px solid rgb(0, 0, 0); width: 7.203%; padding:0;"><select class="cell-select" style="width:100%;font-size:10px;padding:0 1px;">&nbsp;<option value="NO">NO</option><option value="YES">YES</option><option value="*YES">*YES</option>&nbsp; &nbsp;&nbsp;&nbsp;</select></td>
+                            <td style="width: 7.2343%; border: 2px solid rgb(0, 0, 0); padding:0;"><select class="cell-select" style="width:100%;font-size:10px;padding:0 1px;">&nbsp;<option value="NO">NO</option><option value="YES">YES</option><option value="*YES">*YES</option>&nbsp; &nbsp;&nbsp;&nbsp;</select></td>
+                            <td style="width: 7.0821%; border: 2px solid rgb(0, 0, 0); padding:0;"><select class="cell-select" style="width:100%;font-size:10px;padding:0 1px;">&nbsp;<option value="NO">NO</option><option value="YES">YES</option><option value="*YES">*YES</option>&nbsp; &nbsp;&nbsp;&nbsp;</select></td>
+                            <td style="width: 7.5301%; border: 2px solid rgb(0, 0, 0); padding:0;"><select class="cell-select" style="width:100%;font-size:10px;padding:0 1px;">&nbsp;<option value="NO">NO</option><option value="YES">YES</option><option value="*YES">*YES</option>&nbsp; &nbsp;&nbsp;&nbsp;</select></td>
+                            <td style="width: 7.6537%; border: 2px solid rgb(0, 0, 0); padding:0;"><select class="cell-select" style="width:100%;font-size:10px;padding:0 1px;">&nbsp;<option value="NO">NO</option><option value="YES">YES</option><option value="*YES">*YES</option>&nbsp; &nbsp;&nbsp;&nbsp;</select></td>
+                            <td style="border: 2px solid rgb(0, 0, 0); width: 7.3999%; padding:0;"><select class="cell-select" style="width:100%;font-size:10px;padding:0 1px;">&nbsp;<option value="NO">NO</option><option value="YES">YES</option><option value="*YES">*YES</option>&nbsp; &nbsp;&nbsp;&nbsp;</select></td>
+                            <td style="border: 2px solid rgb(0, 0, 0); width: 27.9665%; padding:0;"><input class="cell-input" style="height:100%;" type="text"></td>
+                        </tr>
+                        <tr>
+                            <td style="border: 2px solid rgb(0, 0, 0);"><span style="font-size: 11px;">6</span></td>
+                            <td class="text-left" style="border: 2px solid rgb(0, 0, 0); width: 24.7352%;"><span style="font-size: 11px;">Shunt Reactor</span></td>
+                            <td style="border: 2px solid rgb(0, 0, 0); width: 7.203%; padding:0;"><select class="cell-select" style="width:100%;font-size:10px;padding:0 1px;">&nbsp;<option value="NO">NO</option><option value="YES">YES</option><option value="*YES">*YES</option>&nbsp; &nbsp;&nbsp;&nbsp;</select></td>
+                            <td style="width: 7.2343%; border: 2px solid rgb(0, 0, 0); padding:0;"><select class="cell-select" style="width:100%;font-size:10px;padding:0 1px;">&nbsp;<option value="NO">NO</option><option value="YES">YES</option><option value="*YES">*YES</option>&nbsp; &nbsp;&nbsp;&nbsp;</select></td>
+                            <td style="width: 7.0821%; border: 2px solid rgb(0, 0, 0); padding:0;"><select class="cell-select" style="width:100%;font-size:10px;padding:0 1px;">&nbsp;<option value="NO">NO</option><option value="YES">YES</option><option value="*YES">*YES</option>&nbsp; &nbsp;&nbsp;&nbsp;</select></td>
+                            <td style="width: 7.5301%; border: 2px solid rgb(0, 0, 0); padding:0;"><select class="cell-select" style="width:100%;font-size:10px;padding:0 1px;">&nbsp;<option value="NO">NO</option><option value="YES">YES</option><option value="*YES">*YES</option>&nbsp; &nbsp;&nbsp;&nbsp;</select></td>
+                            <td style="width: 7.6537%; border: 2px solid rgb(0, 0, 0); padding:0;"><select class="cell-select" style="width:100%;font-size:10px;padding:0 1px;">&nbsp;<option value="NO">NO</option><option value="YES">YES</option><option value="*YES">*YES</option>&nbsp; &nbsp;&nbsp;&nbsp;</select></td>
+                            <td style="border: 2px solid rgb(0, 0, 0); width: 7.3999%; padding:0;"><select class="cell-select" style="width:100%;font-size:10px;padding:0 1px;">&nbsp;<option value="NO">NO</option><option value="YES">YES</option><option value="*YES">*YES</option>&nbsp; &nbsp;&nbsp;&nbsp;</select></td>
+                            <td style="border: 2px solid rgb(0, 0, 0); width: 27.9665%; padding:0;"><input class="cell-input" style="height:100%;" type="text"></td>
+                        </tr>
+                        <tr>
+                            <td style="border: 2px solid rgb(0, 0, 0);"><span style="font-size: 11px;">7</span></td>
+                            <td class="text-left" style="border: 2px solid rgb(0, 0, 0); width: 24.7352%;"><span style="font-size: 11px;">Capacitor</span></td>
+                            <td style="border: 2px solid rgb(0, 0, 0); width: 7.203%; padding:0;"><select class="cell-select" style="width:100%;font-size:10px;padding:0 1px;">&nbsp;<option value="NO">NO</option><option value="YES">YES</option><option value="*YES">*YES</option>&nbsp; &nbsp;&nbsp;&nbsp;</select></td>
+                            <td style="width: 7.2343%; border: 2px solid rgb(0, 0, 0); padding:0;"><select class="cell-select" style="width:100%;font-size:10px;padding:0 1px;">&nbsp;<option value="NO">NO</option><option value="YES">YES</option><option value="*YES">*YES</option>&nbsp; &nbsp;&nbsp;&nbsp;</select></td>
+                            <td style="width: 7.0821%; border: 2px solid rgb(0, 0, 0); padding:0;"><select class="cell-select" style="width:100%;font-size:10px;padding:0 1px;">&nbsp;<option value="NO">NO</option><option value="YES">YES</option><option value="*YES">*YES</option>&nbsp; &nbsp;&nbsp;&nbsp;</select></td>
+                            <td style="width: 7.5301%; border: 2px solid rgb(0, 0, 0); padding:0;"><select class="cell-select" style="width:100%;font-size:10px;padding:0 1px;">&nbsp;<option value="NO">NO</option><option value="YES">YES</option><option value="*YES">*YES</option>&nbsp; &nbsp;&nbsp;&nbsp;</select></td>
+                            <td style="width: 7.6537%; border: 2px solid rgb(0, 0, 0); padding:0;"><select class="cell-select" style="width:100%;font-size:10px;padding:0 1px;">&nbsp;<option value="NO">NO</option><option value="YES">YES</option><option value="*YES">*YES</option>&nbsp; &nbsp;&nbsp;&nbsp;</select></td>
+                            <td style="border: 2px solid rgb(0, 0, 0); width: 7.3999%; padding:0;"><select class="cell-select" style="width:100%;font-size:10px;padding:0 1px;">&nbsp;<option value="NO">NO</option><option value="YES">YES</option><option value="*YES">*YES</option>&nbsp; &nbsp;&nbsp;&nbsp;</select></td>
+                            <td style="border: 2px solid rgb(0, 0, 0); width: 27.9665%; padding:0;"><input class="cell-input" style="height:100%;" type="text"></td>
+                        </tr>
+                        <tr>
+                            <td style="border: 2px solid rgb(0, 0, 0);"><span style="font-size: 11px;">8</span></td>
+                            <td class="text-left" style="border: 2px solid rgb(0, 0, 0); width: 24.7352%;"><span style="font-size: 11px;">OHTL</span></td>
+                            <td colspan="3" style="width: 21.4685%; border: 2px solid rgb(0, 0, 0); padding:0; text-align:center;"><select style="width:85%;border:none;outline:none;margin:0 auto;display:block;font-size:11px;font-family:Arial,Helvetica,sans-serif;cursor:pointer;text-align:center;">&nbsp;<option value="NO">NO</option><option value="YES">YES</option><option value="*YES">*YES</option>&nbsp; &nbsp;&nbsp;&nbsp;</select></td>
+                            <td colspan="3" style="width: 22.5129%; border: 2px solid rgb(0, 0, 0); padding:0; text-align:center;"><select style="width:85%;border:none;outline:none;margin:0 auto;display:block;font-size:11px;font-family:Arial,Helvetica,sans-serif;cursor:pointer;text-align:center;">&nbsp;<option value="NO">NO</option><option value="YES">YES</option><option value="*YES">*YES</option>&nbsp; &nbsp;&nbsp;&nbsp;</select></td>
+                            <td style="border: 2px solid rgb(0, 0, 0); width: 27.9665%; padding:0;"><input class="cell-input" style="height:100%;" type="text"></td>
+                        </tr>
+                        <tr>
+                            <td style="border: 2px solid rgb(0, 0, 0);"><span style="font-size: 11px;">9</span></td>
+                            <td class="text-left" style="border: 2px solid rgb(0, 0, 0); width: 24.7352%;"><span style="font-size: 11px;">Power Cable Electrical Tests</span></td>
+                            <td style="border: 2px solid rgb(0, 0, 0); width: 7.203%; padding:0;"><select class="cell-select" style="width:100%;font-size:10px;padding:0 1px;">&nbsp;<option value="NO">NO</option><option value="YES">YES</option><option value="*YES">*YES</option>&nbsp; &nbsp;&nbsp;&nbsp;</select></td>
+                            <td style="width: 7.2343%; border: 2px solid rgb(0, 0, 0); padding:0;"><select class="cell-select" style="width:100%;font-size:10px;padding:0 1px;">&nbsp;<option value="NO">NO</option><option value="YES">YES</option><option value="*YES">*YES</option>&nbsp; &nbsp;&nbsp;&nbsp;</select></td>
+                            <td style="width: 7.0821%; border: 2px solid rgb(0, 0, 0); padding:0;"><select class="cell-select" style="width:100%;font-size:10px;padding:0 1px;">&nbsp;<option value="NO">NO</option><option value="YES">YES</option><option value="*YES">*YES</option>&nbsp; &nbsp;&nbsp;&nbsp;</select></td>
+                            <td style="width: 7.5301%; border: 2px solid rgb(0, 0, 0); padding:0;"><select class="cell-select" style="width:100%;font-size:10px;padding:0 1px;">&nbsp;<option value="NO">NO</option><option value="YES">YES</option><option value="*YES">*YES</option>&nbsp; &nbsp;&nbsp;&nbsp;</select></td>
+                            <td style="width: 7.6537%; border: 2px solid rgb(0, 0, 0); padding:0;"><select class="cell-select" style="width:100%;font-size:10px;padding:0 1px;">&nbsp;<option value="NO">NO</option><option value="YES">YES</option><option value="*YES">*YES</option>&nbsp; &nbsp;&nbsp;&nbsp;</select></td>
+                            <td style="border: 2px solid rgb(0, 0, 0); width: 7.3999%; padding:0;"><select class="cell-select" style="width:100%;font-size:10px;padding:0 1px;">&nbsp;<option value="NO">NO</option><option value="YES">YES</option><option value="*YES">*YES</option>&nbsp; &nbsp;&nbsp;&nbsp;</select></td>
+                            <td style="border: 2px solid rgb(0, 0, 0); width: 27.9665%; padding:0;"><input class="cell-input" style="height:100%;" type="text"></td>
+                        </tr>
+                        <tr>
+                            <td style="border: 2px solid rgb(0, 0, 0);"><span style="font-size: 11px;">10</span></td>
+                            <td class="text-left" style="border: 2px solid rgb(0, 0, 0); width: 24.7352%;"><span style="font-size: 11px;">Power Cable HV Test</span></td>
+                            <td style="border: 2px solid rgb(0, 0, 0); width: 7.203%; padding:0;"><select class="cell-select" style="width:100%;font-size:10px;padding:0 1px;">&nbsp;<option value="NO">NO</option><option value="YES">YES</option><option value="*YES">*YES</option>&nbsp; &nbsp;&nbsp;&nbsp;</select></td>
+                            <td style="width: 7.2343%; border: 2px solid rgb(0, 0, 0); padding:0;"><select class="cell-select" style="width:100%;font-size:10px;padding:0 1px;">&nbsp;<option value="NO">NO</option><option value="YES">YES</option><option value="*YES">*YES</option>&nbsp; &nbsp;&nbsp;&nbsp;</select></td>
+                            <td style="width: 7.0821%; border: 2px solid rgb(0, 0, 0); padding:0;"><select class="cell-select" style="width:100%;font-size:10px;padding:0 1px;">&nbsp;<option value="NO">NO</option><option value="YES">YES</option><option value="*YES">*YES</option>&nbsp; &nbsp;&nbsp;&nbsp;</select></td>
+                            <td style="width: 7.5301%; border: 2px solid rgb(0, 0, 0); padding:0;"><select class="cell-select" style="width:100%;font-size:10px;padding:0 1px;">&nbsp;<option value="NO">NO</option><option value="YES">YES</option><option value="*YES">*YES</option>&nbsp; &nbsp;&nbsp;&nbsp;</select></td>
+                            <td style="width: 7.6537%; border: 2px solid rgb(0, 0, 0); padding:0;"><select class="cell-select" style="width:100%;font-size:10px;padding:0 1px;">&nbsp;<option value="NO">NO</option><option value="YES">YES</option><option value="*YES">*YES</option>&nbsp; &nbsp;&nbsp;&nbsp;</select></td>
+                            <td style="border: 2px solid rgb(0, 0, 0); width: 7.3999%; padding:0;"><select class="cell-select" style="width:100%;font-size:10px;padding:0 1px;">&nbsp;<option value="NO">NO</option><option value="YES">YES</option><option value="*YES">*YES</option>&nbsp; &nbsp;&nbsp;&nbsp;</select></td>
+                            <td style="border: 2px solid rgb(0, 0, 0); width: 27.9665%; padding:0;"><input class="cell-input" style="height:100%;" type="text"></td>
+                        </tr>
+                        <tr>
+                            <td style="border: 2px solid rgb(0, 0, 0);"><span style="font-size: 11px;">11</span></td>
+                            <td class="text-left" style="border: 2px solid rgb(0, 0, 0); width: 24.7352%;"><span style="font-size: 11px;">Power Cable PD Test<sup><span style="color: rgb(255, 0, 0);">1)</span></sup></span></td>
+                            <td style="border: 2px solid rgb(0, 0, 0); width: 7.203%; padding:0;"><select class="cell-select" style="width:100%;font-size:10px;padding:0 1px;">&nbsp;<option value="NO">NO</option><option value="YES">YES</option><option value="*YES">*YES</option>&nbsp; &nbsp;&nbsp;&nbsp;</select></td>
+                            <td style="width: 7.2343%; border: 2px solid rgb(0, 0, 0); padding:0;"><select class="cell-select" style="width:100%;font-size:10px;padding:0 1px;">&nbsp;<option value="NO">NO</option><option value="YES">YES</option><option value="*YES">*YES</option>&nbsp; &nbsp;&nbsp;&nbsp;</select></td>
+                            <td style="width: 7.0821%; border: 2px solid rgb(0, 0, 0); padding:0;"><select class="cell-select" style="width:100%;font-size:10px;padding:0 1px;">&nbsp;<option value="NO">NO</option><option value="YES">YES</option><option value="*YES">*YES</option>&nbsp; &nbsp;&nbsp;&nbsp;</select></td>
+                            <td style="width: 7.5301%; border: 2px solid rgb(0, 0, 0); padding:0;"><select class="cell-select" style="width:100%;font-size:10px;padding:0 1px;">&nbsp;<option value="NO">NO</option><option value="YES">YES</option><option value="*YES">*YES</option>&nbsp; &nbsp;&nbsp;&nbsp;</select></td>
+                            <td style="width: 7.6537%; border: 2px solid rgb(0, 0, 0); padding:0;"><select class="cell-select" style="width:100%;font-size:10px;padding:0 1px;">&nbsp;<option value="NO">NO</option><option value="YES">YES</option><option value="*YES">*YES</option>&nbsp; &nbsp;&nbsp;&nbsp;</select></td>
+                            <td style="border: 2px solid rgb(0, 0, 0); width: 7.3999%; padding:0;"><select class="cell-select" style="width:100%;font-size:10px;padding:0 1px;">&nbsp;<option value="NO">NO</option><option value="YES">YES</option><option value="*YES">*YES</option>&nbsp; &nbsp;&nbsp;&nbsp;</select></td>
+                            <td style="border: 2px solid rgb(0, 0, 0); width: 27.9665%; padding:0;"><input class="cell-input" style="height:100%;" type="text"></td>
+                        </tr>
+                        <tr>
+                            <td style="border: 2px solid rgb(0, 0, 0);"><span style="font-size: 11px;">12</span></td>
+                            <td class="text-left" style="border: 2px solid rgb(0, 0, 0); width: 24.7352%;"><span style="font-size: 11px;">Switchgear Equipment</span></td>
+                            <td style="border: 2px solid rgb(0, 0, 0); width: 7.203%; padding:0;"><select class="cell-select" style="width:100%;font-size:10px;padding:0 1px;">&nbsp;<option value="NO">NO</option><option value="YES">YES</option><option value="*YES">*YES</option>&nbsp; &nbsp;&nbsp;&nbsp;</select></td>
+                            <td style="width: 7.2343%; border: 2px solid rgb(0, 0, 0); padding:0;"><select class="cell-select" style="width:100%;font-size:10px;padding:0 1px;">&nbsp;<option value="NO">NO</option><option value="YES">YES</option><option value="*YES">*YES</option>&nbsp; &nbsp;&nbsp;&nbsp;</select></td>
+                            <td style="width: 7.0821%; border: 2px solid rgb(0, 0, 0); padding:0;"><select class="cell-select" style="width:100%;font-size:10px;padding:0 1px;">&nbsp;<option value="NO">NO</option><option value="YES">YES</option><option value="*YES">*YES</option>&nbsp; &nbsp;&nbsp;&nbsp;</select></td>
+                            <td style="width: 7.5301%; border: 2px solid rgb(0, 0, 0); padding:0;"><select class="cell-select" style="width:100%;font-size:10px;padding:0 1px;">&nbsp;<option value="NO">NO</option><option value="YES">YES</option><option value="*YES">*YES</option>&nbsp; &nbsp;&nbsp;&nbsp;</select></td>
+                            <td style="width: 7.6537%; border: 2px solid rgb(0, 0, 0); padding:0;"><select class="cell-select" style="width:100%;font-size:10px;padding:0 1px;">&nbsp;<option value="NO">NO</option><option value="YES">YES</option><option value="*YES">*YES</option>&nbsp; &nbsp;&nbsp;&nbsp;</select></td>
+                            <td style="border: 2px solid rgb(0, 0, 0); width: 7.3999%; padding:0;"><select class="cell-select" style="width:100%;font-size:10px;padding:0 1px;">&nbsp;<option value="NO">NO</option><option value="YES">YES</option><option value="*YES">*YES</option>&nbsp; &nbsp;&nbsp;&nbsp;</select></td>
+                            <td style="border: 2px solid rgb(0, 0, 0); width: 27.9665%; padding:0;"><input class="cell-input" style="height:100%;" type="text"></td>
+                        </tr>
+                        <tr>
+                            <td style="border: 2px solid rgb(0, 0, 0);"><span style="font-size: 11px;">13</span></td>
+                            <td class="text-left" style="border: 2px solid rgb(0, 0, 0); width: 24.7352%;"><span style="font-size: 11px;">Switchgear HV Test</span></td>
+                            <td style="border: 2px solid rgb(0, 0, 0); width: 7.203%; padding:0;"><select class="cell-select" style="width:100%;font-size:10px;padding:0 1px;">&nbsp;<option value="NO">NO</option><option value="YES">YES</option><option value="*YES">*YES</option>&nbsp; &nbsp;&nbsp;&nbsp;</select></td>
+                            <td style="width: 7.2343%; border: 2px solid rgb(0, 0, 0); padding:0;"><select class="cell-select" style="width:100%;font-size:10px;padding:0 1px;">&nbsp;<option value="NO">NO</option><option value="YES">YES</option><option value="*YES">*YES</option>&nbsp; &nbsp;&nbsp;&nbsp;</select></td>
+                            <td style="width: 7.0821%; border: 2px solid rgb(0, 0, 0); padding:0;"><select class="cell-select" style="width:100%;font-size:10px;padding:0 1px;">&nbsp;<option value="NO">NO</option><option value="YES">YES</option><option value="*YES">*YES</option>&nbsp; &nbsp;&nbsp;&nbsp;</select></td>
+                            <td style="width: 7.5301%; border: 2px solid rgb(0, 0, 0); padding:0;"><select class="cell-select" style="width:100%;font-size:10px;padding:0 1px;">&nbsp;<option value="NO">NO</option><option value="YES">YES</option><option value="*YES">*YES</option>&nbsp; &nbsp;&nbsp;&nbsp;</select></td>
+                            <td style="width: 7.6537%; border: 2px solid rgb(0, 0, 0); padding:0;"><select class="cell-select" style="width:100%;font-size:10px;padding:0 1px;">&nbsp;<option value="NO">NO</option><option value="YES">YES</option><option value="*YES">*YES</option>&nbsp; &nbsp;&nbsp;&nbsp;</select></td>
+                            <td style="border: 2px solid rgb(0, 0, 0); width: 7.3999%; padding:0;"><select class="cell-select" style="width:100%;font-size:10px;padding:0 1px;">&nbsp;<option value="NO">NO</option><option value="YES">YES</option><option value="*YES">*YES</option>&nbsp; &nbsp;&nbsp;&nbsp;</select></td>
+                            <td style="border: 2px solid rgb(0, 0, 0); width: 27.9665%; padding:0;"><input class="cell-input" style="height:100%;" type="text"></td>
+                        </tr>
+                        <tr>
+                            <td style="border: 2px solid rgb(0, 0, 0);"><span style="font-size: 11px;">14</span></td>
+                            <td class="text-left" style="border: 2px solid rgb(0, 0, 0); width: 24.7352%;"><span style="font-size: 11px;">Switchgear PD Test<sup><span style="color: rgb(255, 0, 0);">2)</span></sup></span></td>
+                            <td style="border: 2px solid rgb(0, 0, 0); width: 7.203%; padding:0;"><select class="cell-select" style="width:100%;font-size:10px;padding:0 1px;">&nbsp;<option value="NO">NO</option><option value="YES">YES</option><option value="*YES">*YES</option>&nbsp; &nbsp;&nbsp;&nbsp;</select></td>
+                            <td style="width: 7.2343%; border: 2px solid rgb(0, 0, 0); padding:0;"><select class="cell-select" style="width:100%;font-size:10px;padding:0 1px;">&nbsp;<option value="NO">NO</option><option value="YES">YES</option><option value="*YES">*YES</option>&nbsp; &nbsp;&nbsp;&nbsp;</select></td>
+                            <td style="width: 7.0821%; border: 2px solid rgb(0, 0, 0); padding:0;"><select class="cell-select" style="width:100%;font-size:10px;padding:0 1px;">&nbsp;<option value="NO">NO</option><option value="YES">YES</option><option value="*YES">*YES</option>&nbsp; &nbsp;&nbsp;&nbsp;</select></td>
+                            <td style="width: 7.5301%; border: 2px solid rgb(0, 0, 0); padding:0;"><select class="cell-select" style="width:100%;font-size:10px;padding:0 1px;">&nbsp;<option value="NO">NO</option><option value="YES">YES</option><option value="*YES">*YES</option>&nbsp; &nbsp;&nbsp;&nbsp;</select></td>
+                            <td style="width: 7.6537%; border: 2px solid rgb(0, 0, 0); padding:0;"><select class="cell-select" style="width:100%;font-size:10px;padding:0 1px;">&nbsp;<option value="NO">NO</option><option value="YES">YES</option><option value="*YES">*YES</option>&nbsp; &nbsp;&nbsp;&nbsp;</select></td>
+                            <td style="border: 2px solid rgb(0, 0, 0); width: 7.3999%; padding:0;"><select class="cell-select" style="width:100%;font-size:10px;padding:0 1px;">&nbsp;<option value="NO">NO</option><option value="YES">YES</option><option value="*YES">*YES</option>&nbsp; &nbsp;&nbsp;&nbsp;</select></td>
+                            <td style="border: 2px solid rgb(0, 0, 0); width: 27.9665%; padding:0;"><input class="cell-input" style="height:100%;" type="text"></td>
+                        </tr>
+                        <tr>
+                            <td style="border: 2px solid rgb(0, 0, 0);"><span style="font-size: 11px;">15</span></td>
+                            <td class="text-left" style="border: 2px solid rgb(0, 0, 0); width: 24.7352%;"><span style="font-size: 11px;">Scheme Check</span></td>
+                            <td style="border: 2px solid rgb(0, 0, 0); width: 7.203%; padding:0;"><select class="cell-select" style="width:100%;font-size:10px;padding:0 1px;">&nbsp;<option value="NO">NO</option><option value="YES">YES</option><option value="*YES">*YES</option>&nbsp; &nbsp;&nbsp;&nbsp;</select></td>
+                            <td style="width: 7.2343%; border: 2px solid rgb(0, 0, 0); padding:0;"><select class="cell-select" style="width:100%;font-size:10px;padding:0 1px;">&nbsp;<option value="NO">NO</option><option value="YES">YES</option><option value="*YES">*YES</option>&nbsp; &nbsp;&nbsp;&nbsp;</select></td>
+                            <td style="width: 7.0821%; border: 2px solid rgb(0, 0, 0); padding:0;"><select class="cell-select" style="width:100%;font-size:10px;padding:0 1px;">&nbsp;<option value="NO">NO</option><option value="YES">YES</option><option value="*YES">*YES</option>&nbsp; &nbsp;&nbsp;&nbsp;</select></td>
+                            <td style="width: 7.5301%; border: 2px solid rgb(0, 0, 0); padding:0;"><select class="cell-select" style="width:100%;font-size:10px;padding:0 1px;">&nbsp;<option value="NO">NO</option><option value="YES">YES</option><option value="*YES">*YES</option>&nbsp; &nbsp;&nbsp;&nbsp;</select></td>
+                            <td style="width: 7.6537%; border: 2px solid rgb(0, 0, 0); padding:0;"><select class="cell-select" style="width:100%;font-size:10px;padding:0 1px;">&nbsp;<option value="NO">NO</option><option value="YES">YES</option><option value="*YES">*YES</option>&nbsp; &nbsp;&nbsp;&nbsp;</select></td>
+                            <td style="border: 2px solid rgb(0, 0, 0); width: 7.3999%; padding:0;"><select class="cell-select" style="width:100%;font-size:10px;padding:0 1px;">&nbsp;<option value="NO">NO</option><option value="YES">YES</option><option value="*YES">*YES</option>&nbsp; &nbsp;&nbsp;&nbsp;</select></td>
+                            <td style="border: 2px solid rgb(0, 0, 0); width: 27.9665%; padding:0;"><input class="cell-input" style="height:100%;" type="text"></td>
+                        </tr>
+                        <tr>
+                            <td style="border: 2px solid rgb(0, 0, 0);"><span style="font-size: 11px;">16</span></td>
+                            <td class="text-left" style="border: 2px solid rgb(0, 0, 0); width: 24.7352%;"><span style="font-size: 11px;">CT Primary&amp;Secondary Injection</span></td>
+                            <td style="border: 2px solid rgb(0, 0, 0); width: 7.203%; padding:0;"><select class="cell-select" style="width:100%;font-size:10px;padding:0 1px;">&nbsp;<option value="NO">NO</option><option value="YES">YES</option><option value="*YES">*YES</option>&nbsp; &nbsp;&nbsp;&nbsp;</select></td>
+                            <td style="width: 7.2343%; border: 2px solid rgb(0, 0, 0); padding:0;"><select class="cell-select" style="width:100%;font-size:10px;padding:0 1px;">&nbsp;<option value="NO">NO</option><option value="YES">YES</option><option value="*YES">*YES</option>&nbsp; &nbsp;&nbsp;&nbsp;</select></td>
+                            <td style="width: 7.0821%; border: 2px solid rgb(0, 0, 0); padding:0;"><select class="cell-select" style="width:100%;font-size:10px;padding:0 1px;">&nbsp;<option value="NO">NO</option><option value="YES">YES</option><option value="*YES">*YES</option>&nbsp; &nbsp;&nbsp;&nbsp;</select></td>
+                            <td style="width: 7.5301%; border: 2px solid rgb(0, 0, 0); padding:0;"><select class="cell-select" style="width:100%;font-size:10px;padding:0 1px;">&nbsp;<option value="NO">NO</option><option value="YES">YES</option><option value="*YES">*YES</option>&nbsp; &nbsp;&nbsp;&nbsp;</select></td>
+                            <td style="width: 7.6537%; border: 2px solid rgb(0, 0, 0); padding:0;"><select class="cell-select" style="width:100%;font-size:10px;padding:0 1px;">&nbsp;<option value="NO">NO</option><option value="YES">YES</option><option value="*YES">*YES</option>&nbsp; &nbsp;&nbsp;&nbsp;</select></td>
+                            <td style="border: 2px solid rgb(0, 0, 0); width: 7.3999%; padding:0;"><select class="cell-select" style="width:100%;font-size:10px;padding:0 1px;">&nbsp;<option value="NO">NO</option><option value="YES">YES</option><option value="*YES">*YES</option>&nbsp; &nbsp;&nbsp;&nbsp;</select></td>
+                            <td style="border: 2px solid rgb(0, 0, 0); width: 27.9665%; padding:0;"><input class="cell-input" style="height:100%;" type="text"></td>
+                        </tr>
+                        <tr>
+                            <td style="border: 2px solid rgb(0, 0, 0);"><span style="font-size: 11px;">17</span></td>
+                            <td class="text-left" style="border: 2px solid rgb(0, 0, 0); width: 24.7352%;"><span style="font-size: 11px;">VT Secondary Injection</span></td>
+                            <td style="border: 2px solid rgb(0, 0, 0); width: 7.203%; padding:0;"><select class="cell-select" style="width:100%;font-size:10px;padding:0 1px;">&nbsp;<option value="NO">NO</option><option value="YES">YES</option><option value="*YES">*YES</option>&nbsp; &nbsp;&nbsp;&nbsp;</select></td>
+                            <td style="width: 7.2343%; border: 2px solid rgb(0, 0, 0); padding:0;"><select class="cell-select" style="width:100%;font-size:10px;padding:0 1px;">&nbsp;<option value="NO">NO</option><option value="YES">YES</option><option value="*YES">*YES</option>&nbsp; &nbsp;&nbsp;&nbsp;</select></td>
+                            <td style="width: 7.0821%; border: 2px solid rgb(0, 0, 0); padding:0;"><select class="cell-select" style="width:100%;font-size:10px;padding:0 1px;">&nbsp;<option value="NO">NO</option><option value="YES">YES</option><option value="*YES">*YES</option>&nbsp; &nbsp;&nbsp;&nbsp;</select></td>
+                            <td style="width: 7.5301%; border: 2px solid rgb(0, 0, 0); padding:0;"><select class="cell-select" style="width:100%;font-size:10px;padding:0 1px;">&nbsp;<option value="NO">NO</option><option value="YES">YES</option><option value="*YES">*YES</option>&nbsp; &nbsp;&nbsp;&nbsp;</select></td>
+                            <td style="width: 7.6537%; border: 2px solid rgb(0, 0, 0); padding:0;"><select class="cell-select" style="width:100%;font-size:10px;padding:0 1px;">&nbsp;<option value="NO">NO</option><option value="YES">YES</option><option value="*YES">*YES</option>&nbsp; &nbsp;&nbsp;&nbsp;</select></td>
+                            <td style="border: 2px solid rgb(0, 0, 0); width: 7.3999%; padding:0;"><select class="cell-select" style="width:100%;font-size:10px;padding:0 1px;">&nbsp;<option value="NO">NO</option><option value="YES">YES</option><option value="*YES">*YES</option>&nbsp; &nbsp;&nbsp;&nbsp;</select></td>
+                            <td style="border: 2px solid rgb(0, 0, 0); width: 27.9665%; padding:0;"><input class="cell-input" style="height:100%;" type="text"></td>
+                        </tr>
+                        <tr>
+                            <td style="border: 2px solid rgb(0, 0, 0);"><span style="font-size: 11px;">18</span></td>
+                            <td class="text-left" style="border: 2px solid rgb(0, 0, 0); width: 24.7352%;"><span style="font-size: 11px;">Simple Protection Relays</span></td>
+                            <td style="border: 2px solid rgb(0, 0, 0); width: 7.203%; padding:0;"><select class="cell-select" style="width:100%;font-size:10px;padding:0 1px;">&nbsp;<option value="NO">NO</option><option value="YES">YES</option><option value="*YES">*YES</option>&nbsp; &nbsp;&nbsp;&nbsp;</select></td>
+                            <td style="width: 7.2343%; border: 2px solid rgb(0, 0, 0); padding:0;"><select class="cell-select" style="width:100%;font-size:10px;padding:0 1px;">&nbsp;<option value="NO">NO</option><option value="YES">YES</option><option value="*YES">*YES</option>&nbsp; &nbsp;&nbsp;&nbsp;</select></td>
+                            <td style="width: 7.0821%; border: 2px solid rgb(0, 0, 0); padding:0;"><select class="cell-select" style="width:100%;font-size:10px;padding:0 1px;">&nbsp;<option value="NO">NO</option><option value="YES">YES</option><option value="*YES">*YES</option>&nbsp; &nbsp;&nbsp;&nbsp;</select></td>
+                            <td style="width: 7.5301%; border: 2px solid rgb(0, 0, 0); padding:0;"><select class="cell-select" style="width:100%;font-size:10px;padding:0 1px;">&nbsp;<option value="NO">NO</option><option value="YES">YES</option><option value="*YES">*YES</option>&nbsp; &nbsp;&nbsp;&nbsp;</select></td>
+                            <td style="width: 7.6537%; border: 2px solid rgb(0, 0, 0); padding:0;"><select class="cell-select" style="width:100%;font-size:10px;padding:0 1px;">&nbsp;<option value="NO">NO</option><option value="YES">YES</option><option value="*YES">*YES</option>&nbsp; &nbsp;&nbsp;&nbsp;</select></td>
+                            <td style="border: 2px solid rgb(0, 0, 0); width: 7.3999%; padding:0;"><select class="cell-select" style="width:100%;font-size:10px;padding:0 1px;">&nbsp;<option value="NO">NO</option><option value="YES">YES</option><option value="*YES">*YES</option>&nbsp; &nbsp;&nbsp;&nbsp;</select></td>
+                            <td style="border: 2px solid rgb(0, 0, 0); width: 27.9665%; padding:0;"><input class="cell-input" style="height:100%;" type="text"></td>
+                        </tr>
+                        <tr>
+                            <td style="border: 2px solid rgb(0, 0, 0);"><span style="font-size: 11px;">19</span></td>
+                            <td class="text-left" style="border: 2px solid rgb(0, 0, 0); width: 24.7352%;"><span style="font-size: 11px;">Advanced Protection&amp;Control IEDs</span></td>
+                            <td style="border: 2px solid rgb(0, 0, 0); width: 7.203%; padding:0;"><select class="cell-select" style="width:100%;font-size:10px;padding:0 1px;">&nbsp;<option value="NO">NO</option><option value="YES">YES</option><option value="*YES">*YES</option>&nbsp; &nbsp;&nbsp;&nbsp;</select></td>
+                            <td style="width: 7.2343%; border: 2px solid rgb(0, 0, 0); padding:0;"><select class="cell-select" style="width:100%;font-size:10px;padding:0 1px;">&nbsp;<option value="NO">NO</option><option value="YES">YES</option><option value="*YES">*YES</option>&nbsp; &nbsp;&nbsp;&nbsp;</select></td>
+                            <td style="width: 7.0821%; border: 2px solid rgb(0, 0, 0); padding:0;"><select class="cell-select" style="width:100%;font-size:10px;padding:0 1px;">&nbsp;<option value="NO">NO</option><option value="YES">YES</option><option value="*YES">*YES</option>&nbsp; &nbsp;&nbsp;&nbsp;</select></td>
+                            <td style="width: 7.5301%; border: 2px solid rgb(0, 0, 0); padding:0;"><select class="cell-select" style="width:100%;font-size:10px;padding:0 1px;">&nbsp;<option value="NO">NO</option><option value="YES">YES</option><option value="*YES">*YES</option>&nbsp; &nbsp;&nbsp;&nbsp;</select></td>
+                            <td style="width: 7.6537%; border: 2px solid rgb(0, 0, 0); padding:0;"><select class="cell-select" style="width:100%;font-size:10px;padding:0 1px;">&nbsp;<option value="NO">NO</option><option value="YES">YES</option><option value="*YES">*YES</option>&nbsp; &nbsp;&nbsp;&nbsp;</select></td>
+                            <td style="border: 2px solid rgb(0, 0, 0); width: 7.3999%; padding:0;"><select class="cell-select" style="width:100%;font-size:10px;padding:0 1px;">&nbsp;<option value="NO">NO</option><option value="YES">YES</option><option value="*YES">*YES</option>&nbsp; &nbsp;&nbsp;&nbsp;</select></td>
+                            <td style="border: 2px solid rgb(0, 0, 0); width: 27.9665%; padding:0;"><input class="cell-input" style="height:100%;" type="text"></td>
+                        </tr>
+                        <tr>
+                            <td style="border: 2px solid rgb(0, 0, 0);"><span style="font-size: 11px;">20</span></td>
+                            <td class="text-left" style="border: 2px solid rgb(0, 0, 0); width: 24.7352%;"><span style="font-size: 11px;">Stability Test</span></td>
+                            <td style="border: 2px solid rgb(0, 0, 0); width: 7.203%; padding:0;"><select class="cell-select" style="width:100%;font-size:10px;padding:0 1px;">&nbsp;<option value="NO">NO</option><option value="YES">YES</option><option value="*YES">*YES</option>&nbsp; &nbsp;&nbsp;&nbsp;</select></td>
+                            <td style="width: 7.2343%; border: 2px solid rgb(0, 0, 0); padding:0;"><select class="cell-select" style="width:100%;font-size:10px;padding:0 1px;">&nbsp;<option value="NO">NO</option><option value="YES">YES</option><option value="*YES">*YES</option>&nbsp; &nbsp;&nbsp;&nbsp;</select></td>
+                            <td style="width: 7.0821%; border: 2px solid rgb(0, 0, 0); padding:0;"><select class="cell-select" style="width:100%;font-size:10px;padding:0 1px;">&nbsp;<option value="NO">NO</option><option value="YES">YES</option><option value="*YES">*YES</option>&nbsp; &nbsp;&nbsp;&nbsp;</select></td>
+                            <td style="width: 7.5301%; border: 2px solid rgb(0, 0, 0); padding:0;"><select class="cell-select" style="width:100%;font-size:10px;padding:0 1px;">&nbsp;<option value="NO">NO</option><option value="YES">YES</option><option value="*YES">*YES</option>&nbsp; &nbsp;&nbsp;&nbsp;</select></td>
+                            <td style="width: 7.6537%; border: 2px solid rgb(0, 0, 0); padding:0;"><select class="cell-select" style="width:100%;font-size:10px;padding:0 1px;">&nbsp;<option value="NO">NO</option><option value="YES">YES</option><option value="*YES">*YES</option>&nbsp; &nbsp;&nbsp;&nbsp;</select></td>
+                            <td style="border: 2px solid rgb(0, 0, 0); width: 7.3999%; padding:0;"><select class="cell-select" style="width:100%;font-size:10px;padding:0 1px;">&nbsp;<option value="NO">NO</option><option value="YES">YES</option><option value="*YES">*YES</option>&nbsp; &nbsp;&nbsp;&nbsp;</select></td>
+                            <td style="border: 2px solid rgb(0, 0, 0); width: 27.9665%; padding:0;"><input class="cell-input" style="height:100%;" type="text"></td>
+                        </tr>
+                        <tr>
+                            <td style="border: 2px solid rgb(0, 0, 0);"><span style="font-size: 11px;">21</span></td>
+                            <td class="text-left" style="border: 2px solid rgb(0, 0, 0); width: 24.7352%;"><span style="font-size: 11px;">End To End Test</span></td>
+                            <td style="width: 7.203%; background-color: rgb(0, 0, 0); border: 2px solid rgb(0, 0, 0);"><br></td>
+                            <td style="width: 7.2343%; border: 2px solid rgb(0, 0, 0); padding:0;"><select class="cell-select" style="width:100%;font-size:10px;padding:0 1px;">&nbsp;<option value="NO">NO</option><option value="YES">YES</option><option value="*YES">*YES</option>&nbsp; &nbsp;&nbsp;&nbsp;</select></td>
+                            <td style="width: 7.0821%; border: 2px solid rgb(0, 0, 0); padding:0;"><select class="cell-select" style="width:100%;font-size:10px;padding:0 1px;">&nbsp;<option value="NO">NO</option><option value="YES">YES</option><option value="*YES">*YES</option>&nbsp; &nbsp;&nbsp;&nbsp;</select></td>
+                            <td style="width: 7.5301%; background-color: rgb(0, 0, 0); border: 2px solid rgb(0, 0, 0);"><br></td>
+                            <td style="width: 7.6537%; border: 2px solid rgb(0, 0, 0); padding:0;"><select class="cell-select" style="width:100%;font-size:10px;padding:0 1px;">&nbsp;<option value="NO">NO</option><option value="YES">YES</option><option value="*YES">*YES</option>&nbsp; &nbsp;&nbsp;&nbsp;</select></td>
+                            <td style="border: 2px solid rgb(0, 0, 0); width: 7.3999%; padding:0;"><select class="cell-select" style="width:100%;font-size:10px;padding:0 1px;">&nbsp;<option value="NO">NO</option><option value="YES">YES</option><option value="*YES">*YES</option>&nbsp; &nbsp;&nbsp;&nbsp;</select></td>
+                            <td style="border: 2px solid rgb(0, 0, 0); width: 27.9665%; padding:0;"><input class="cell-input" style="height:100%;" type="text"></td>
+                        </tr>
+                        <tr>
+                            <td style="border: 2px solid rgb(0, 0, 0);"><span style="font-size: 11px;">22</span></td>
+                            <td class="text-left" style="border: 2px solid rgb(0, 0, 0); width: 24.7352%;"><span style="font-size: 11px;">Final Trip Test</span></td>
+                            <td style="border: 2px solid rgb(0, 0, 0); width: 7.203%; padding:0;"><select class="cell-select" style="width:100%;font-size:10px;padding:0 1px;">&nbsp;<option value="NO">NO</option><option value="YES">YES</option><option value="*YES">*YES</option>&nbsp; &nbsp;&nbsp;&nbsp;</select></td>
+                            <td style="width: 7.2343%; border: 2px solid rgb(0, 0, 0); padding:0;"><select class="cell-select" style="width:100%;font-size:10px;padding:0 1px;">&nbsp;<option value="NO">NO</option><option value="YES">YES</option><option value="*YES">*YES</option>&nbsp; &nbsp;&nbsp;&nbsp;</select></td>
+                            <td style="width: 7.0821%; border: 2px solid rgb(0, 0, 0); padding:0;"><select class="cell-select" style="width:100%;font-size:10px;padding:0 1px;">&nbsp;<option value="NO">NO</option><option value="YES">YES</option><option value="*YES">*YES</option>&nbsp; &nbsp;&nbsp;&nbsp;</select></td>
+                            <td style="width: 7.5301%; border: 2px solid rgb(0, 0, 0); padding:0;"><select class="cell-select" style="width:100%;font-size:10px;padding:0 1px;">&nbsp;<option value="NO">NO</option><option value="YES">YES</option><option value="*YES">*YES</option>&nbsp; &nbsp;&nbsp;&nbsp;</select></td>
+                            <td style="width: 7.6537%; border: 2px solid rgb(0, 0, 0); padding:0;"><select class="cell-select" style="width:100%;font-size:10px;padding:0 1px;">&nbsp;<option value="NO">NO</option><option value="YES">YES</option><option value="*YES">*YES</option>&nbsp; &nbsp;&nbsp;&nbsp;</select></td>
+                            <td style="border: 2px solid rgb(0, 0, 0); width: 7.3999%; padding:0;"><select class="cell-select" style="width:100%;font-size:10px;padding:0 1px;">&nbsp;<option value="NO">NO</option><option value="YES">YES</option><option value="*YES">*YES</option>&nbsp; &nbsp;&nbsp;&nbsp;</select></td>
+                            <td style="border: 2px solid rgb(0, 0, 0); width: 27.9665%; padding:0;"><input class="cell-input" style="height:100%;" type="text"></td>
+                        </tr>
+                        <tr>
+                            <td style="border: 2px solid rgb(0, 0, 0);"><span style="font-size: 11px;">23</span></td>
+                            <td class="text-left" style="border: 2px solid rgb(0, 0, 0); width: 24.7352%;"><span style="font-size: 11px;">Live Substations<strong><span style="color: rgb(255, 0, 0);"><sup>3)</sup></span></strong></span></td>
+                            <td colspan="3" style="width: 21.4685%; border: 2px solid rgb(0, 0, 0); padding:0; text-align:center;"><select style="width:85%;border:none;outline:none;margin:0 auto;display:block;font-size:11px;font-family:Arial,Helvetica,sans-serif;cursor:pointer;text-align:center;">&nbsp;<option value="NO">NO</option><option value="YES">YES</option><option value="*YES">*YES</option>&nbsp; &nbsp;&nbsp;&nbsp;</select></td>
+                            <td colspan="3" style="width: 22.5129%; border: 2px solid rgb(0, 0, 0); padding:0; text-align:center;"><select style="width:85%;border:none;outline:none;margin:0 auto;display:block;font-size:11px;font-family:Arial,Helvetica,sans-serif;cursor:pointer;text-align:center;">&nbsp;<option value="NO">NO</option><option value="YES">YES</option><option value="*YES">*YES</option>&nbsp; &nbsp;&nbsp;&nbsp;</select></td>
+                            <td style="border: 2px solid rgb(0, 0, 0); width: 27.9665%; padding:0;"><input class="cell-input" style="height:100%;" type="text"></td>
+                        </tr>
+                        <tr>
+                            <td style="border: 2px solid rgb(0, 0, 0);"><span style="font-size: 11px;">24</span></td>
+                            <td class="text-left" style="border: 2px solid rgb(0, 0, 0); width: 24.7352%;"><span style="font-size: 11px;">Site Coordinator<sup><span style="color: rgb(255, 0, 0);">4)</span></sup></span></td>
+                            <td style="width: 7.203%; background-color: rgb(0, 0, 0); border: 2px solid rgb(0, 0, 0);"><br></td>
+                            <td style="width: 7.2343%; border: 2px solid rgb(0, 0, 0); padding:0;"><select class="cell-select" style="width:100%;font-size:10px;padding:0 1px;">&nbsp;<option value="NO">NO</option><option value="YES">YES</option><option value="*YES">*YES</option>&nbsp; &nbsp;&nbsp;&nbsp;</select></td>
+                            <td style="width: 7.0821%; border: 2px solid rgb(0, 0, 0); padding:0;"><select class="cell-select" style="width:100%;font-size:10px;padding:0 1px;">&nbsp;<option value="NO">NO</option><option value="YES">YES</option><option value="*YES">*YES</option>&nbsp; &nbsp;&nbsp;&nbsp;</select></td>
+                            <td style="width: 7.5301%; background-color: rgb(0, 0, 0); border: 2px solid rgb(0, 0, 0);"><br></td>
+                            <td style="width: 7.6537%; border: 2px solid rgb(0, 0, 0); padding:0;"><select class="cell-select" style="width:100%;font-size:10px;padding:0 1px;">&nbsp;<option value="NO">NO</option><option value="YES">YES</option><option value="*YES">*YES</option>&nbsp; &nbsp;&nbsp;&nbsp;</select></td>
+                            <td style="border: 2px solid rgb(0, 0, 0); width: 7.3999%; padding:0;"><select class="cell-select" style="width:100%;font-size:10px;padding:0 1px;">&nbsp;<option value="NO">NO</option><option value="YES">YES</option><option value="*YES">*YES</option>&nbsp; &nbsp;&nbsp;&nbsp;</select></td>
+                            <td style="border: 2px solid rgb(0, 0, 0); width: 27.9665%; padding:0;"><input class="cell-input" style="height:100%;" type="text"></td>
+                        </tr>
+                        <tr>
+                            <td colspan="9" style="width: 99.7175%; background-color: rgb(255, 255, 255); text-align: left; padding: 0px; vertical-align: top; line-height: 0; height: 4px; border-width: medium; border-style: none; border-color: rgb(0, 0, 0);">
+                                <div style="font-size:11px;font-family:Arial,Helvetica,sans-serif;line-height:1.2;padding:0px 1px;">Further Remarks:</div><textarea class="cell-textarea" id="further-remarks-textarea" rows="4" style="width:100%;border:none;outline:none;margin:0;padding:2px;font-size:11px;font-family:Arial,Helvetica,sans-serif;resize:none;display:block;box-sizing:border-box;"></textarea>
+                            </td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+            <div class="remarks-section">
+                <div class="remarks-notes" style="text-align: left; font-size: 10px; font-family: Arial, Helvetica, sans-serif; font-weight: normal; line-height: 1.4; padding: 1px 2px;"><span style="color: rgb(255, 0, 0);">1)</span> T&amp;C Contractor Engineer shall be certified by <strong>the Power Cable PD measuring unit manufacturer.</strong><br><span style="color: rgb(255, 0, 0);">2)</span> T&amp;C Contractor Engineer shall be certified by <strong>the Switchgear PD measuring unit manufacturer.</strong><br><span style="color: rgb(255, 0, 0);">3)</span> Full knowledge of <strong>the procedure (PR-NG-6460-008 Commissioning in Live Substation Projects)</strong> and no less than&nbsp;<strong>(1) year</strong> experience in KSA.<br><span style="color: rgb(255, 0, 0);">4)</span> Full knowledge of <strong>all CSD procedures</strong> and must be approved in the activities above <strong>No.3, 4, 15, 16, 17, 18, 19, 20, 21 and 22</strong> for the same voltage level.</div>
+            </div>
+            <div class="remarks-section">
+                <div class="remarks-title"><span style="font-size: 11px;"><strong><u>Note: Final approval is subjected to the performance at the site.</u></strong></span></div>
+                <table style="width: 100%; border-collapse: collapse; border: 1px solid rgb(0, 0, 0);">
+                    <tbody>
+                        <tr>
+                            <td style="width: 4.7946%; text-align: center; border: 1px solid rgb(0, 0, 0); background-color: rgb(255, 255, 255); height: 5px;"><span style="font-size: 11px;">#</span></td>
+                            <td colspan="2" style="width: 50.154%; text-align: center; border: 1px solid rgb(0, 0, 0); background-color: rgb(255, 255, 255); height: 5px; padding: 5px;"><span style="font-size: 11px;">Examiner Name<br></span></td>
+                            <td style="width: 19.0431%; text-align: center; border: 1px solid rgb(0, 0, 0); background-color: rgb(255, 255, 255); height: 5px;"><span style="font-size: 11px;">Date<br></span></td>
+                            <td style="width: 26.854%; text-align: center; border: 1px solid rgb(0, 0, 0); background-color: rgb(255, 255, 255); height: 5px;"><span style="font-size: 11px;">Signature</span></td>
+                        </tr>
+                        <tr>
+                            <td style="width: 4.7946%; text-align: center; border: 1px solid rgb(0, 0, 0); background-color: rgb(255, 255, 255); height: 20px;"><span style="font-size: 11px;">1</span></td>
+                            <td colspan="2" style="width: 50.154%; border: 1px solid rgb(0, 0, 0); background-color: rgb(255, 255, 255); height: 20px; padding: 0px;"><input class="cell-input" style="font-size:11px;" type="text"></td>
+                            <td style="width: 19.0431%; border: 1px solid rgb(0, 0, 0); background-color: rgb(255, 255, 255); height: 20px; text-align: center; padding: 2px;">
+                                <div class="date-cell"><input class="date-display" placeholder="" readonly="" type="text"><button class="date-cal-btn no-print" onclick="openDatePicker(this)" type="button">📅</button><input class="date-hidden-picker" onchange="formatDateField(this)" type="date"></div>
+                            </td>
+                            <td style="width: 26.854%; border: 1px solid rgb(0, 0, 0); background-color: rgb(255, 255, 255); height: 38px; text-align: center; padding: 0px; vertical-align: middle;">
+                                <div style="position:relative;width:100%;height:38px;overflow:hidden;"><img alt="" id="sig-img-ex1" src="" style="margin: 0 auto 0 0; display: block; top: 0px; left: 0px; width: 100%; height: 100%; object-fit: contain;">
+                                    <div class="no-print" id="sig-btns-ex1" style="position:absolute;top:2px;right:2px;z-index:2;display:flex;gap:3px;"><label for="sig-input-ex1" style="cursor:pointer;background:rgba(255,255,255,0.85);border:1px solid #999;border-radius:3px;padding:2px 4px;font-size:13px;line-height:1;" title="Upload signature">🖉</label> <button onclick="clearSig('ex1')" style="background:rgba(255,255,255,0.85);border:1px solid #999;border-radius:3px;padding:2px 4px;font-size:13px;line-height:1;cursor:pointer;" title="Delete signature">🗑</button></div><input accept="image/*" id="sig-input-ex1" onchange="loadSig(this,'ex1')" style="display:none;" type="file">
+                                </div>
+                            </td>
+                        </tr>
+                        <tr>
+                            <td style="width: 4.7946%; text-align: center; border: 1px solid rgb(0, 0, 0); background-color: rgb(255, 255, 255); height: 20px;"><span style="font-size: 11px;">2</span></td>
+                            <td colspan="2" style="width: 50.154%; border: 1px solid rgb(0, 0, 0); background-color: rgb(255, 255, 255); height: 20px; padding: 0px;"><input class="cell-input" style="font-size:11px;" type="text"></td>
+                            <td style="width: 19.0431%; border: 1px solid rgb(0, 0, 0); height: 20px; text-align: center; padding: 2px;">
+                                <div class="date-cell"><input class="date-display" placeholder="" readonly="" type="text"><button class="date-cal-btn no-print" onclick="openDatePicker(this)" type="button">📅</button><input class="date-hidden-picker" onchange="formatDateField(this)" type="date"></div>
+                            </td>
+                            <td style="width: 26.854%; border: 1px solid rgb(0, 0, 0); height: 38px; text-align: center; padding: 0px; vertical-align: middle;">
+                                <div style="position:relative;width:100%;height:38px;overflow:hidden;"><img alt="" id="sig-img-ex2" src="" style="margin: 0 auto 0 0; display: block; top: 0px; left: 0px; width: 100%; height: 100%; object-fit: contain;">
+                                    <div class="no-print" id="sig-btns-ex2" style="position:absolute;top:2px;right:2px;z-index:2;display:flex;gap:3px;"><label for="sig-input-ex2" style="cursor:pointer;background:rgba(255,255,255,0.85);border:1px solid #999;border-radius:3px;padding:2px 4px;font-size:13px;line-height:1;" title="Upload signature">🖉</label> <button onclick="clearSig('ex2')" style="background:rgba(255,255,255,0.85);border:1px solid #999;border-radius:3px;padding:2px 4px;font-size:13px;line-height:1;cursor:pointer;" title="Delete signature">🗑</button></div><input accept="image/*" id="sig-input-ex2" onchange="loadSig(this,'ex2')" style="display:none;" type="file">
+                                </div>
+                            </td>
+                        </tr>
+                        <tr>
+                            <td colspan="2" style="width: 20.3103%; border: 1px solid rgb(0, 0, 0); background-color: rgb(255, 255, 255); padding: 5px;"><span style="font-size: 11px;"><strong>Divisional Qualification Coordinator:</strong></span></td>
+                            <td colspan="3" style="width: 79.6897%; border: 1px solid rgb(0, 0, 0); background-color: rgb(255, 255, 255); padding: 6px 8px; text-align: center;"><span style="font-size: 10.5px; font-style: italic;">The Divisional qualification coordinator shall digitally sign after receiving the generated pdf file of this form.</span></td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
         </div>
-
-        <div class="grid-3">
-          <div class="form-group">
-            <label for="regNumber">Commercial Reg / Tax ID:</label>
-            <input type="text" id="regNumber" name="regNumber" required>
-          </div>
-          <div class="form-group">
-            <label for="country">Country of Incorporation:</label>
-            <input type="text" id="country" name="country" required>
-          </div>
-          <div class="form-group">
-            <label for="yearEstablished">Year Established:</label>
-            <input type="number" id="yearEstablished" name="yearEstablished" min="1800" max="2099">
-          </div>
-        </div>
-
-        <div class="grid-2">
-          <div class="form-group">
-            <label for="regAddress">Registered Address:</label>
-            <textarea id="regAddress" name="regAddress" rows="2"></textarea>
-          </div>
-          <div class="form-group">
-            <label for="webAddress">Website / Domain:</label>
-            <input type="url" id="webAddress" name="webAddress" placeholder="https://">
-          </div>
-        </div>
-      </fieldset>
-
-      <!-- Section 2: Contact Person -->
-      <fieldset class="form-section">
-        <legend>2. Authorized Representative Contact</legend>
-        <div class="grid-3">
-          <div class="form-group">
-            <label for="contactName">Full Name:</label>
-            <input type="text" id="contactName" name="contactName" required>
-          </div>
-          <div class="form-group">
-            <label for="contactDesignation">Designation / Title:</label>
-            <input type="text" id="contactDesignation" name="contactDesignation" required>
-          </div>
-          <div class="form-group">
-            <label for="contactEmail">Official Email:</label>
-            <input type="email" id="contactEmail" name="contactEmail" required>
-          </div>
-        </div>
-        <div class="grid-2">
-          <div class="form-group">
-            <label for="contactPhone">Phone / Mobile:</label>
-            <input type="tel" id="contactPhone" name="contactPhone">
-          </div>
-          <div class="form-group">
-            <label for="businessCategory">Business Scope / Category:</label>
-            <select id="businessCategory" name="businessCategory">
-              <option value="">-- Select Scope --</option>
-              <option value="Consulting">Consulting &amp; Engineering</option>
-              <option value="Construction">Civil / General Construction</option>
-              <option value="Supply">Procurement &amp; Material Supply</option>
-              <option value="IT">Technology &amp; Systems</option>
-              <option value="Logistics">Logistics &amp; Operations</option>
-            </select>
-          </div>
-        </div>
-      </fieldset>
-
-      <!-- Section 3: Financial & Technical Capability -->
-      <fieldset class="form-section">
-        <legend>3. Financial Standing &amp; Quality Management</legend>
-        <div class="grid-3">
-          <div class="form-group">
-            <label for="annualRevenue">Avg. Annual Turnover (USD):</label>
-            <input type="text" id="annualRevenue" name="annualRevenue">
-          </div>
-          <div class="form-group">
-            <label for="isoStandards">ISO / Quality Standards:</label>
-            <input type="text" id="isoStandards" name="isoStandards" placeholder="e.g. ISO 9001, 14001">
-          </div>
-          <div class="form-group">
-            <label for="insuranceCoverage">Professional Indemnity Limit:</label>
-            <input type="text" id="insuranceCoverage" name="insuranceCoverage">
-          </div>
-        </div>
-      </fieldset>
-
-      <!-- Section 4: Declaration & Signature -->
-      <fieldset class="form-section">
-        <legend>4. Formal Declaration &amp; Authorization</legend>
-        <p class="disclaimer-text">
-          I hereby certify that the information provided herein is authentic, accurate, and complete. I acknowledge that any falsification or intentional omission will result in immediate disqualification.
-        </p>
-        <div class="grid-3 signature-block">
-          <div class="form-group">
-            <label for="signatoryName">Signatory Name:</label>
-            <input type="text" id="signatoryName" name="signatoryName" required>
-          </div>
-          <div class="form-group">
-            <label for="signDate">Date:</label>
-            <input type="date" id="signDate" name="signDate" required>
-          </div>
-          <div class="form-group">
-            <label>Stamp / Signature Area:</label>
-            <div class="signature-box">Authorized Signature</div>
-          </div>
-        </div>
-      </fieldset>
-    </form>
-  </div>
-
-  <script src="script.js"></script>
+    </div>
+    </div>
+    <script src="script.js"></script>
 </body>
+
 </html>
