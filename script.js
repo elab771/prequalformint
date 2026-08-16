@@ -6,6 +6,12 @@
         var PDFJS_SRC = 'https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.min.js';
         var PDFJS_WORKER_SRC = 'https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.worker.min.js';
         var PDFLIB_SRC = 'https://cdnjs.cloudflare.com/ajax/libs/pdf-lib/1.17.1/pdf-lib.min.js';
+        // qpdf compiled to WebAssembly. Used as a second pass after pdf-lib
+        // fills/saves the form, to apply real document-level PDF permission
+        // restrictions (block adding text/comments/images, allow form-fill)
+        // that pdf-lib itself cannot create (pdf-lib has no encryption support).
+        var QPDF_WASM_JS_SRC = 'https://cdn.jsdelivr.net/npm/@neslinesli93/qpdf-wasm@0.3.0/dist/qpdf.js';
+        var QPDF_WASM_WASM_SRC = 'https://cdn.jsdelivr.net/npm/@neslinesli93/qpdf-wasm@0.3.0/dist/qpdf.wasm';
 
         var _scriptLoadPromises = {};
         function loadScriptOnce(src) {
@@ -33,6 +39,73 @@
         function ensurePdfLibLoaded() {
           if (typeof PDFLib !== 'undefined') return Promise.resolve();
           return loadScriptOnce(PDFLIB_SRC);
+        }
+
+        // qpdf-wasm ships as an ES module, so it's loaded via dynamic
+        // import() (works fine from a classic <script>, no type="module"
+        // needed) rather than the classic-script loader used above.
+        var _qpdfModulePromise = null;
+        function getQpdfModule() {
+          if (!_qpdfModulePromise) {
+            _qpdfModulePromise = import(QPDF_WASM_JS_SRC).then(function(mod) {
+              var createQpdfModule = mod.default || mod;
+              return createQpdfModule({
+                locateFile: function() { return QPDF_WASM_WASM_SRC; },
+                noInitialRun: true
+              });
+            });
+          }
+          return _qpdfModulePromise;
+        }
+
+        // Applies document-level PDF restrictions (via qpdf) on top of the
+        // already-filled/field-locked PDF produced by pdf-lib. This is what
+        // actually stops someone from adding text, comments, or images to
+        // the PDF in Acrobat/PDF-XChange/etc, which pdf-lib cannot do on its
+        // own since it has no encryption/permissions support.
+        //
+        // Per team decision: no owner password is set, so nobody needs a
+        // password to remove the restriction later — the restriction is
+        // simply always on. Both the open (user) password and the owner
+        // password are left empty; --allow-insecure is required by qpdf for
+        // 256-bit encryption with an empty owner password.
+        //
+        // --form=y is the key setting that keeps the still-fillable fields
+        // (the DQC's name/date/signature, per DQC_EDITABLE_FIELD_NAMES)
+        // actually fillable in the output PDF: it explicitly re-permits
+        // form-filling even though general annotations/page edits
+        // (--annotate=n / --modify-other=n) are blocked. Field-level locking
+        // (lockAllFieldsExcept, applied separately, above) is what decides
+        // WHICH fields remain fillable; this permission layer only controls
+        // whether form-filling as a category is allowed at all.
+        async function applyPdfRestrictions(pdfBytes) {
+          var qpdf = await getQpdfModule();
+          var INPUT_PATH = '/restrict_input.pdf';
+          var OUTPUT_PATH = '/restrict_output.pdf';
+          try {
+            qpdf.FS.writeFile(INPUT_PATH, pdfBytes);
+            var exitCode = qpdf.callMain([
+              INPUT_PATH,
+              '--encrypt', '', '', '256',
+              '--allow-insecure',
+              '--print=full',
+              '--modify-other=n',
+              '--annotate=n',
+              '--form=y',
+              '--assemble=n',
+              '--extract=y',
+              '--',
+              OUTPUT_PATH
+            ]);
+            if (exitCode !== 0 && exitCode !== undefined) {
+              console.warn('qpdf exited with code', exitCode, '- restrictions may not have been applied.');
+            }
+            var restrictedBytes = qpdf.FS.readFile(OUTPUT_PATH);
+            return restrictedBytes;
+          } finally {
+            try { qpdf.FS.unlink(INPUT_PATH); } catch (e) {}
+            try { qpdf.FS.unlink(OUTPUT_PATH); } catch (e) {}
+          }
         }
 
         /* ====== iOS / iPadOS detection ======
@@ -1003,6 +1076,22 @@
             lockAllFieldsExcept(form, DQC_EDITABLE_FIELD_NAMES);
         
             var pdfBytes = await pdfDoc.save();
+
+            // Second pass: apply real document-level PDF restrictions (block
+            // adding text/comments/images anywhere in the PDF) via qpdf-wasm.
+            // This is on top of, not instead of, the field-level locking
+            // above. If qpdf-wasm fails to load (e.g. offline), fall back to
+            // shipping the field-locked-only PDF rather than blocking the
+            // whole print flow, but let the user know restrictions weren't
+            // fully applied.
+            if (printBtn) printBtn.textContent = 'Applying restrictions…';
+            try {
+              pdfBytes = await applyPdfRestrictions(pdfBytes);
+            } catch (qpdfErr) {
+              console.warn('Could not apply document-level PDF restrictions:', qpdfErr);
+              alert('Note: the PDF was generated and field-locked successfully, but the additional edit-restriction step could not be applied (this requires an internet connection to load a one-time library). The PDF will still download, but general page editing (text/comments/images) will not be blocked.');
+            }
+
             var blob = new Blob([pdfBytes], { type: 'application/pdf' });
             var url = URL.createObjectURL(blob);
         
