@@ -41,22 +41,25 @@
           return loadScriptOnce(PDFLIB_SRC);
         }
 
-        // qpdf-wasm ships as an ES module, so it's loaded via dynamic
-        // import() (works fine from a classic <script>, no type="module"
-        // needed) rather than the classic-script loader used above.
-        var _qpdfModulePromise = null;
-        function getQpdfModule() {
-          if (!_qpdfModulePromise) {
-            _qpdfModulePromise = import(QPDF_WASM_JS_SRC).then(function(mod) {
-              var createQpdfModule = mod.default || mod;
-              return createQpdfModule({
-                locateFile: function() { return QPDF_WASM_WASM_SRC; },
-                noInitialRun: true
-              });
-            });
-          }
-          return _qpdfModulePromise;
-        }
+           // qpdf-wasm is a classic Emscripten UMD build (not a true ES module), so it
+           // must be loaded as a normal <script> tag — not via import() — otherwise the
+           // browser treats it as an empty module and createQpdfModule ends up
+           // undefined, silently breaking the PDF restriction step.
+           var _qpdfModulePromise = null;
+           function getQpdfModule() {
+             if (!_qpdfModulePromise) {
+               _qpdfModulePromise = loadScriptOnce(QPDF_WASM_JS_SRC).then(function() {
+                 if (typeof Module !== 'function') {
+                   throw new Error('qpdf-wasm library did not load correctly.');
+                 }
+                 return Module({
+                   locateFile: function() { return QPDF_WASM_WASM_SRC; },
+                   noInitialRun: true
+                 });
+               });
+             }
+             return _qpdfModulePromise;
+           }
 
         // Applies document-level PDF restrictions (via qpdf) on top of the
         // already-filled/field-locked PDF produced by pdf-lib. This is what
