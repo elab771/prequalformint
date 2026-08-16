@@ -871,10 +871,9 @@
         var DQC_EDITABLE_FIELD_NAMES = [
           'txtdivqualcoor',           // DQC name
           'txtdivqualcoorsigndate',   // DQC sign date
+          'txtcsdid',                 // CSD ID
+          'txtrevno',                 // Revision No
           'imgsigdivcoor',            // DQC signature image field
-          'btn_addimg',               // "+" upload-signature button (DQC)
-          'btn_delimg',               // "-" delete-signature button (DQC)
-          'HiddenBlank'               // helper button paired with the above
         ];
         
         function lockAllFieldsExcept(form, editableNames) {
