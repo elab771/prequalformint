@@ -81,9 +81,10 @@
         // (lockAllFieldsExcept, applied separately, above) is what decides
         // WHICH fields remain fillable; this permission layer only controls
         // whether form-filling as a category is allowed at all.
-        function buildOwnerPassword(date) {
-          return 'CSDtscd081114' + formatDdMmYyyy(date);
-        }
+           function buildOwnerPassword(identityNo) {
+             var cleaned = (identityNo || '').trim().replace(/[^a-zA-Z0-9]/g, '');
+             return 'CSDtscd081114' + cleaned;
+           }
 
         async function applyPdfRestrictions(pdfBytes, ownerPassword) {
           var qpdf = await getQpdfModule();
@@ -1101,12 +1102,14 @@
             // shipping the field-locked-only PDF rather than blocking the
             // whole print flow, but let the user know restrictions weren't
             // fully applied.
-            if (printBtn) printBtn.textContent = 'Applying restrictions…';
-            var printDate = new Date();
-            var ownerPassword = buildOwnerPassword(printDate);
-            try {
-              pdfBytes = await applyPdfRestrictions(pdfBytes, ownerPassword);
-            } catch (qpdfErr) {
+                       if (printBtn) printBtn.textContent = 'Applying restrictions…';
+           var printDate = new Date();
+           var identityInput = profileInputs[5];
+           var iqama = (identityInput && identityInput.value.trim()) ? identityInput.value.trim().replace(/[^a-zA-Z0-9]/g, '') : 'UNKNOWN';
+           var ownerPassword = buildOwnerPassword(iqama);
+           try {
+             pdfBytes = await applyPdfRestrictions(pdfBytes, ownerPassword);
+           } catch (qpdfErr) {           
               console.warn('Could not apply document-level PDF restrictions:', qpdfErr);
               alert('Note: the PDF was generated and field-locked successfully, but the additional edit-restriction step could not be applied (this requires an internet connection to load a one-time library). The PDF will still download, but general page editing (text/comments/images) will not be blocked.');
             }
@@ -1114,9 +1117,7 @@
             var blob = new Blob([pdfBytes], { type: 'application/pdf' });
             var url = URL.createObjectURL(blob);
         
-            var identityInput = profileInputs[5];
-            var iqama = (identityInput && identityInput.value.trim()) ? identityInput.value.trim().replace(/[^a-zA-Z0-9]/g, '') : 'UNKNOWN';
-            var companyNameInput = profileInputs[1];
+           var companyNameInput = profileInputs[1];
             var companyId = getCompanyId(companyNameInput ? companyNameInput.value : '');
             var dateStamp = formatDdMmmYy(printDate);
             var filename = 'intres_' + companyId + '_' + iqama + '_' + dateStamp + '.pdf';
