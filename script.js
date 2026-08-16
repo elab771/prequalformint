@@ -64,11 +64,11 @@
         // the PDF in Acrobat/PDF-XChange/etc, which pdf-lib cannot do on its
         // own since it has no encryption/permissions support.
         //
-        // Per team decision: no owner password is set, so nobody needs a
-        // password to remove the restriction later — the restriction is
-        // simply always on. Both the open (user) password and the owner
-        // password are left empty; --allow-insecure is required by qpdf for
-        // 256-bit encryption with an empty owner password.
+        // Fixed owner password: "CSDtscd081114" + the print date as
+        // "ddmmyyyy". The OWNER password is what's needed to change/remove
+        // the restrictions below (e.g. in Acrobat/PDF-XChange); the USER
+        // (open) password is left empty so the PDF still opens for anyone
+        // without a prompt.
         //
         // --form=y is the key setting that keeps the still-fillable fields
         // (the DQC's name/date/signature, per DQC_EDITABLE_FIELD_NAMES)
@@ -78,7 +78,11 @@
         // (lockAllFieldsExcept, applied separately, above) is what decides
         // WHICH fields remain fillable; this permission layer only controls
         // whether form-filling as a category is allowed at all.
-        async function applyPdfRestrictions(pdfBytes) {
+        function buildOwnerPassword(date) {
+          return 'CSDtscd081114' + formatDdMmYyyy(date);
+        }
+
+        async function applyPdfRestrictions(pdfBytes, ownerPassword) {
           var qpdf = await getQpdfModule();
           var INPUT_PATH = '/restrict_input.pdf';
           var OUTPUT_PATH = '/restrict_output.pdf';
@@ -86,7 +90,7 @@
             qpdf.FS.writeFile(INPUT_PATH, pdfBytes);
             var exitCode = qpdf.callMain([
               INPUT_PATH,
-              '--encrypt', '', '', '256',
+              '--encrypt', '', ownerPassword || '', '256',
               '--allow-insecure',
               '--print=full',
               '--modify-other=n',
@@ -846,6 +850,16 @@
           return dd + mmm + yy;
         }
 
+        // "ddmmyyyy" — used to build the fixed owner password for the
+        // printed/generated PDF (see buildOwnerPassword above).
+        function formatDdMmYyyy(date) {
+          function pad2(n) { return String(n).padStart(2, '0'); }
+          var dd = pad2(date.getDate());
+          var mm = pad2(date.getMonth() + 1);
+          var yyyy = String(date.getFullYear());
+          return dd + mm + yyyy;
+        }
+
         /* ====== Official PDF Generation ====== */
         var templatePdfBytesCache = null;
         
@@ -1085,8 +1099,10 @@
             // whole print flow, but let the user know restrictions weren't
             // fully applied.
             if (printBtn) printBtn.textContent = 'Applying restrictions…';
+            var printDate = new Date();
+            var ownerPassword = buildOwnerPassword(printDate);
             try {
-              pdfBytes = await applyPdfRestrictions(pdfBytes);
+              pdfBytes = await applyPdfRestrictions(pdfBytes, ownerPassword);
             } catch (qpdfErr) {
               console.warn('Could not apply document-level PDF restrictions:', qpdfErr);
               alert('Note: the PDF was generated and field-locked successfully, but the additional edit-restriction step could not be applied (this requires an internet connection to load a one-time library). The PDF will still download, but general page editing (text/comments/images) will not be blocked.');
@@ -1099,7 +1115,7 @@
             var iqama = (identityInput && identityInput.value.trim()) ? identityInput.value.trim().replace(/[^a-zA-Z0-9]/g, '') : 'UNKNOWN';
             var companyNameInput = profileInputs[1];
             var companyId = getCompanyId(companyNameInput ? companyNameInput.value : '');
-            var dateStamp = formatDdMmmYy(new Date());
+            var dateStamp = formatDdMmmYy(printDate);
             var filename = 'intres_' + companyId + '_' + iqama + '_' + dateStamp + '.pdf';
         
             if (isIOS()) {
