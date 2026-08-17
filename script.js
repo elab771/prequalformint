@@ -871,7 +871,6 @@
            var DQC_EDITABLE_FIELD_NAMES = [
              'txtdivqualcoor',           // DQC name
              'txtdivqualcoorsigndate',   // DQC sign date
-             'imgsigdivcoor',            // DQC signature image field
              'txtcsdid',                 // CSD ID No — "TO BE FILLED BY CSD-TSCD"
              'txtrevno'                  // Revision No — "TO BE FILLED BY CSD-TSCD"
            ];
