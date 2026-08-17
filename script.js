@@ -961,8 +961,7 @@
 
             var helvBold = await pdfDoc.embedFont(StandardFonts.HelveticaBold);
         
-            var COLOR_NO = [1, 0, 0];       
-            var COLOR_YES = [0, 0.5, 0];    
+           var COLOR_YES = [0, 0.5, 0];   
             var COLOR_STARYES = [0, 0, 1];  
             var COLOR_REMARKS = [0, 0, 1];  
         
@@ -1044,17 +1043,17 @@
         
             var qualSelects = getQualificationSelects();
             for (var i = 0; i < qualSelects.length && i < QUAL_FIELD_MAP.length; i++) {
-              var qFieldName = QUAL_FIELD_MAP[i];
-              var qValue = qualSelects[i].value;
-              var qIsCsdField = qFieldName && qFieldName.indexOf('ctxt') === 0;
-              // Dropdowns maintain their auto-scaling size via { fontSize: 0 }
-              var qStyle = { fontSize: 0 }; 
-              if (qIsCsdField) {
-                if (qValue === 'NO') qStyle.color = COLOR_NO;
-                else if (qValue === 'YES') qStyle.color = COLOR_YES;
-                else if (qValue === '*YES') qStyle.color = COLOR_STARYES;
-              }
-              setTextSafe(qFieldName, qValue, qStyle);
+           var qFieldName = QUAL_FIELD_MAP[i];
+           var qValue = qualSelects[i].value;
+           var qIsCsdField = qFieldName && qFieldName.indexOf('ctxt') === 0;
+           // Dropdowns maintain their auto-scaling size via { fontSize: 0 }
+           var qStyle = { fontSize: 0 }; 
+           if (qIsCsdField) {
+             if (qValue === 'YES') qStyle.color = COLOR_YES;
+             else if (qValue === '*YES') qStyle.color = COLOR_STARYES;
+             // NO intentionally left uncolored — falls back to black (default) instead of COLOR_NO
+           }
+           setTextSafe(qFieldName, qValue, qStyle);
             }
         
             var remarksInputs = getQualRemarksInputs();
