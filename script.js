@@ -868,13 +868,13 @@
         var templatePdfBytesCache = null;
         
         // Editable fields to keep open
-        var DQC_EDITABLE_FIELD_NAMES = [
-          'txtdivqualcoor',           // DQC name
-          'txtdivqualcoorsigndate',   // DQC sign date
-          'txtcsdid',                 // CSD ID
-          'txtrevno',                 // Revision No
-          'imgsigdivcoor',            // DQC signature image field
-        ];
+           var DQC_EDITABLE_FIELD_NAMES = [
+             'txtdivqualcoor',           // DQC name
+             'txtdivqualcoorsigndate',   // DQC sign date
+             'imgsigdivcoor',            // DQC signature image field
+             'txtcsdid',                 // CSD ID No — "TO BE FILLED BY CSD-TSCD"
+             'txtrevno'                  // Revision No — "TO BE FILLED BY CSD-TSCD"
+           ];
         
         function lockAllFieldsExcept(form, editableNames) {
           var editableSet = {};
